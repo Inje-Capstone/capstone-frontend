@@ -1,3 +1,11 @@
+# LOOKIE Frontend
+
+React + TypeScript + Vite 기반 캡스톤 MVP입니다. 실행 및 시연 방법은 [MVP 사용 안내](docs/mvp-guide.md)를 참고하세요.
+
+로그인 화면에서 **서버 없이 화면 시연 시작**을 선택하면 전체 프론트엔드 흐름을 확인할 수 있습니다.
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
