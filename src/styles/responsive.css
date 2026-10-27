@@ -1,0 +1,67 @@
+/* The viewport, not the physical monitor size, determines the UI scale. */
+html{font-size:clamp(16px,calc(10px + .5vw),24px)}
+#root{width:100%;max-width:none;min-height:100svh;margin:0;border:0;display:flex;flex-direction:column}
+#main-content{flex:1;display:flex;flex-direction:column;min-width:0}
+.page{width:100%;padding-inline:clamp(1.25rem,2.7vw,5rem)}
+#main-content>.page{flex:1}
+.home-page,.profile-page{min-height:0}
+.app-nav{padding-inline:clamp(1.25rem,2.7vw,5rem);flex-shrink:0}
+.demo-banner,.offline-banner,.storage-warning{flex-shrink:0}
+.game-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.featured-game{min-height:9rem}
+.game-card,.more-card{min-height:7rem}
+.quiz-history{max-width:none;min-width:0}
+.quiz-question,.term-detail,.dictionary-layout>aside,.shop-layout>section{min-width:0;overflow-wrap:anywhere}
+.term-list,.history-list{max-height:clamp(18rem,49svh,38rem)}
+.term-detail{min-height:24rem}
+.watch-page{width:100%;padding-inline:clamp(1.25rem,2.7vw,5rem);align-items:start;grid-template-columns:minmax(0,1.97fr) minmax(0,1fr);gap:1.25rem}
+.analysis-panel dd,.explanation-card,.analysis-note,.chat-message{overflow-wrap:anywhere}
+.analysis-panel>summary{flex-wrap:wrap}
+.reward-strip{flex-shrink:0;padding-inline:clamp(1.25rem,2.7vw,5rem);flex-wrap:wrap;padding-bottom:.75rem}
+.profile-content{width:58%;max-width:none;min-width:min(100%,36rem)}
+.shop-layout{grid-template-columns:minmax(15rem,.33fr) minmax(0,1fr)}
+.shop-preview{height:auto;aspect-ratio:1.07}
+.shop-preview .character-scene{margin-bottom:.5rem}
+.product-picture{height:auto;min-height:6rem;aspect-ratio:1.7}
+.login-page{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:clamp(2rem,8svh,7rem) 1.5rem}
+.login-panel{width:25rem;margin:auto 0}
+.onboarding-page{width:100%;padding-inline:clamp(1.25rem,2.7vw,5rem)}
+.onboarding-card{width:26.25rem}
+.splash-seam{width:clamp(12rem,20vw,25rem)}
+.splash-seam.left{left:6vw}.splash-seam.right{right:6vw}
+.modal{width:min(38.75rem,calc(100vw - 2rem));max-width:calc(100vw - 2rem)}
+.withdrawal-modal{width:25rem}
+.offline-card{max-width:25rem;width:100%;min-height:19rem;padding:1.5rem 1rem;gap:1rem}
+.offline-motion{display:flex;flex-direction:column;align-items:center;gap:.5rem;width:100%}
+.offline-baseball{display:block;width:5rem;height:5rem;flex:none;transform-origin:50% 50%;transform-box:fill-box;animation:offline-clockwise 3s linear infinite}
+.offline-baseball.paused{animation-play-state:paused}
+.motion-toggle{font-size:.6875rem;color:#888}
+@keyframes offline-clockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* Keep this small status indicator moving gently; it also has an explicit pause control. */
+@media(prefers-reduced-motion:reduce){.offline-baseball{animation-duration:8s}}
+@media(min-width:1800px){.home-page .game-grid{gap:1.25rem}.game-card,.more-card{min-height:8rem}.shop-preview .character-scene{transform:scale(2.2)}}
+@media(min-width:651px) and (max-width:1100px){
+ .app-nav{gap:1.25rem}.app-nav nav{gap:1.25rem}.app-nav nav a{font-size:.875rem}
+ .products{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .shop-layout{grid-template-columns:minmax(14rem,.4fr) minmax(0,1fr)}
+ .profile-content{width:75%;min-width:0}
+ .quiz-layout,.dictionary-layout{gap:1.5rem}
+ .scoreboard{margin-left:0;white-space:normal}
+ .splash-seam.left{left:-3rem}.splash-seam.right{right:-3rem}
+}
+@media(min-width:651px) and (max-width:900px){
+ .watch-page{grid-template-columns:minmax(0,1fr)}
+ .watch-aside{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+ .ai-card-panel{grid-column:1/-1}
+ .watch-aside .analysis-panel{align-self:start}
+ .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .nav-right{gap:.5rem}.app-nav{gap:1rem}.app-nav nav{gap:1rem}
+ .quiz-feedback{flex-wrap:wrap}.profile-content{width:100%}
+ .reward-strip{gap:1rem}.reward-field{width:23rem;max-width:100%}
+}
+/* Retain the existing narrow-screen fallback; mobile polish is outside this change. */
+@media(max-width:650px){
+ .game-grid{grid-template-columns:1fr}.profile-content{width:100%;min-width:0}
+ .watch-page,.shop-layout{display:flex;flex-direction:column}.watch-aside{width:100%}
+ .splash-seam.left{left:-10rem}.splash-seam.right{right:-10rem}
+}
