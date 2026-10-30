@@ -1,13 +1,13 @@
 import { useCallback,useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
+import { isAiDemoMode } from '../config/aiMode'
 import { listGames } from '../services/gameService'
 import { useResource } from '../hooks/useResource'
 import { useProgress } from '../state/ProgressContext'
 import ResourceState from '../components/ResourceState'
 import type { Game } from '../types/mvp'
 export default function HomePage() {
- const {demo}=useAuth(),{progress}=useProgress(),navigate=useNavigate()
+ const demo=isAiDemoMode(),{progress}=useProgress(),navigate=useNavigate()
  const games=useResource(useCallback((signal:AbortSignal)=>listGames(signal),[]))
  const [expanded,setExpanded]=useState(false)
  const featured=games.data?.find(g=>demo?g.id==='20260823LGOB':g.has_video)

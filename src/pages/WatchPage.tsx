@@ -1,4 +1,5 @@
 import { useCallback,useEffect,useRef,useState } from 'react'
+import { isAiDemoMode } from '../config/aiMode'
 import type { FormEvent } from 'react'
 import { Link,useNavigate,useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
@@ -12,7 +13,8 @@ import Modal from '../components/Modal'
 import ResourceState from '../components/ResourceState'
 import type { Card } from '../types/mvp'
 export default function WatchPage() {
- const {gameId=''}=useParams(),{state:auth,demo}=useAuth(),{progress,savePlayback,markSeen,addWatchSeconds,setReview}=useProgress()
+ const {gameId=''}=useParams(),{state:auth}=useAuth(),{progress,savePlayback,markSeen,addWatchSeconds,setReview}=useProgress()
+ const demo = isAiDemoMode()
  const navigate=useNavigate()
  const [time,setTime]=useState(()=>progress.playback[gameId]||0),[playing,setPlaying]=useState(false),[rate,setRate]=useState(1)
  const [duration,setDuration]=useState(600),[localUrl,setLocalUrl]=useState(''),[videoError,setVideoError]=useState('')
