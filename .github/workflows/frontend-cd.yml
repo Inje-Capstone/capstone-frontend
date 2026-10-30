@@ -61,6 +61,7 @@ jobs:
       - name: Build frontend
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_AI_DEMO_MODE: ${{ vars.VITE_AI_DEMO_MODE }}
         run: |
           : "${VITE_API_BASE_URL:?VITE_API_BASE_URL must be set}"
           npm run build
