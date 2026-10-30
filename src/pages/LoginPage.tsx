@@ -11,7 +11,7 @@ import kakaoIcon from '../assets/brands/kakao-simple.svg'
 import './LoginPage.css'
 
 export default function LoginPage() {
-  const { state, signIn, startDemo } = useAuth()
+  const {state, signIn } = useAuth()
   const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -69,11 +69,6 @@ export default function LoginPage() {
         <a href={oauthStartUrl('kakao')} className="kakao-login" aria-label="카카오로 로그인" title="카카오로 로그인"><span className="kakao-symbol"><img src={kakaoIcon} alt=""/></span></a>
       </div>
       <p className="login-footnote">야구를 알아가는 첫걸음, LOOKIE와 함께해요.</p>
-      <div className="demo-login">
-        <button type="button" className="secondary-button" onClick={() => startDemo()}>서버 없이 화면 시연 시작</button>
-        <small>가상 경기와 기기 내 기록으로 전체 흐름을 확인해요.</small>
-        <Link to="/signup?mode=demo">시연용 회원가입부터 시작 →</Link>
-      </div>
     </section>
   </main>
 }
