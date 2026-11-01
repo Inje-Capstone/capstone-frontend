@@ -1,5 +1,4 @@
-import { isDemoSession } from '../demo/demoAccount'
-
+// AI fallback is an explicit deployment choice, independent of authentication.
 export function isAiDemoMode(): boolean {
-    return isDemoSession() || import.meta.env.VITE_AI_DEMO_MODE === 'true'
+ return import.meta.env.VITE_AI_DEMO_MODE === 'true'
 }

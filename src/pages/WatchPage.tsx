@@ -6,7 +6,8 @@ import { useAuth } from '../auth/AuthContext'
 import { useProgress } from '../state/ProgressContext'
 import { useResource } from '../hooks/useResource'
 import * as service from '../services/gameService'
-import { demoGame,scenes } from '../demo/gameData'
+import { reconnectTime,clearReconnect } from '../state/reconnect'
+import { demoGame } from '../demo/gameData'
 import { clock } from '../data/choices'
 import { getErrorMessage } from '../api/apiClient'
 import Modal from '../components/Modal'
@@ -16,8 +17,8 @@ export default function WatchPage() {
  const {gameId=''}=useParams(),{state:auth}=useAuth(),{progress,savePlayback,markSeen,addWatchSeconds,setReview}=useProgress()
  const demo = isAiDemoMode()
  const navigate=useNavigate()
- const [time,setTime]=useState(()=>progress.playback[gameId]||0),[playing,setPlaying]=useState(false),[rate,setRate]=useState(1)
- const [duration,setDuration]=useState(600),[localUrl,setLocalUrl]=useState(''),[videoError,setVideoError]=useState('')
+ const [time,setTime]=useState(()=>reconnectTime(gameId)??progress.playback[gameId]??0),[playing,setPlaying]=useState(false),[rate]=useState(1)
+ const [duration,setDuration]=useState(600),[videoError,setVideoError]=useState('')
  const [endModal,setEndModal]=useState(false),[simplified,setSimplified]=useState<Record<string,Card>>({}),[simplifying,setSimplifying]=useState('')
  const [expandedCard,setExpandedCard]=useState('')
  const [panelError,setPanelError]=useState(''),[chatOpen,setChatOpen]=useState(false),[question,setQuestion]=useState('')
@@ -35,9 +36,8 @@ export default function WatchPage() {
  const matchupBucket=Math.floor(time/60)*60
  const matchup=useResource(useCallback((signal:AbortSignal)=>service.matchup(gameId,matchupBucket,signal),[gameId,matchupBucket]))
  const configured=gameId===import.meta.env.VITE_REPLAY_GAME_ID?import.meta.env.VITE_REPLAY_VIDEO_URL||'':''
- const source=localUrl||configured
+ const source=configured
  const allowed=demo?gameId===demoGame.id:Boolean(configured&&game?.has_video)
- useEffect(()=>()=>{if(localUrl)URL.revokeObjectURL(localUrl)},[localUrl])
  useEffect(()=>{if(game?.video_duration_sec)queueMicrotask(()=>setDuration(game.video_duration_sec))},[game])
  useEffect(()=>{
   if(cards.data?.cards.length)markSeen(cards.data.cards.slice(0,1).map(c=>c.term_id))
@@ -58,7 +58,7 @@ export default function WatchPage() {
   return ()=>window.clearInterval(timer)
  },[playing,source,rate,duration,gameId,savePlayback,addWatchSeconds])
  function seek(next:number) {
-  const t=Math.max(0,Math.min(duration,next));timeRef.current=t;setTime(t);savePlayback(gameId,t)
+  const t=Math.max(0,Math.min(duration,next));timeRef.current=t;setTime(t);savePlayback(gameId,t);clearReconnect()
   if(video.current&&source)video.current.currentTime=t
  }
  function toggle() {
@@ -86,16 +86,12 @@ export default function WatchPage() {
   <section className="watch-main" aria-label="경기 영상과 챗봇">
    {source?<video ref={video} className="video-player" src={source} playsInline
     onLoadedMetadata={()=>{if(video.current&&Number.isFinite(video.current.duration)&&video.current.duration>0){setDuration(video.current.duration);video.current.currentTime=Math.min(timeRef.current,video.current.duration);video.current.playbackRate=rate}}}
-    onTimeUpdate={()=>{if(video.current){const t=video.current.currentTime;timeRef.current=t;setTime(t);savePlayback(gameId,t)}}}
+    onTimeUpdate={()=>{if(video.current){const t=video.current.currentTime;timeRef.current=t;setTime(t);savePlayback(gameId,t);clearReconnect()}}}
     onPlay={()=>{setPlaying(true);setVideoError('')}} onPause={()=>setPlaying(false)} onEnded={finish} onError={()=>{setPlaying(false);setVideoError('영상 파일을 읽을 수 없어요. 파일 형식과 경로를 확인해주세요.')}} controls/>:
-    <div className="video-placeholder"><small>녹화 경기 · 화면 시연</small><div><h1>{game.home_team} vs {game.away_team}</h1><p>실제 영상 미확보</p><p className="small">아래 재생·탐색으로 가상 장면과 설명을 확인해요.</p><button onClick={toggle} className="preview-play" aria-label={playing?'시연 일시정지':'시연 재생'}>{playing?'Ⅱ':'▶'}</button></div><span className="tag">시연 타임라인 {clock(time)}</span></div>}
+    <div className="video-placeholder"><small>녹화 경기 · 화면 시연</small><div><h1>{game.home_team} vs {game.away_team}</h1><p>실제 영상 미확보</p><p className="small">재생 버튼과 탐색 막대로 경기 설명을 확인해요.</p><button onClick={toggle} className="preview-play" aria-label={playing?'시연 일시정지':'시연 재생'}>{playing?<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="5" y="3" width="5" height="18" rx="1" fill="currentColor"/><rect x="14" y="3" width="5" height="18" rx="1" fill="currentColor"/></svg>:'▶'}</button></div><span className="tag">시연 타임라인 {clock(time)}</span></div>}
    {videoError&&<p role="alert" className="login-error">{videoError}</p>}
    <label className="sr-only" htmlFor="video-timeline">재생 위치</label><input id="video-timeline" type="range" min="0" max={duration||600} step="1" value={time} onChange={e=>seek(Number(e.target.value))}/>
-   <div className="playback-controls"><button className="secondary-button small-button" onClick={toggle}>{playing?'일시정지':'재생'}</button>
-    <label><span className="sr-only">재생 속도</span><select aria-label="재생 속도" value={rate} onChange={e=>{const n=Number(e.target.value);setRate(n);if(video.current)video.current.playbackRate=n}}>{[.5,1,1.5,2].map(n=><option key={n} value={n}>{n}x</option>)}</select></label>
-    <span className="small">{clock(time)} / {clock(duration)}</span><span className="scoreboard">{board.data?.scoreboard||'스코어보드 준비 중'}</span></div>
-   {demo&&<div className="scene-jumps">{scenes.map(s=><button key={s.t} className="chip" onClick={()=>seek(s.t)}>{clock(s.t)} {s.title}</button>)}</div>}
-   {demo&&<details className="local-video"><summary>내 녹화 영상 선택 (선택 사항)</summary><p className="muted small">선택한 영상은 가상 경기 설명과 자동으로 맞춰지지 않아요.</p><input type="file" accept="video/*" aria-label="녹화 영상 파일" onChange={e=>{const file=e.target.files?.[0];if(file){setPlaying(false);setLocalUrl(URL.createObjectURL(file));setVideoError('')}}}/></details>}
+   <div className="playback-status"><span className="small">{clock(time)} / {clock(duration)}</span><span className="scoreboard">{board.data?.scoreboard||'스코어보드 준비 중'}</span></div>
    <div className="chat-box">{chatOpen&&<section className="chat-history" aria-label="AI 대화"><div className="between"><strong>AI 챗봇 {demo&&<small className="muted">· 준비된 시연 응답</small>}</strong><button className="text-button" onClick={()=>setChatOpen(false)}>접기</button></div>
     <div className="messages" role="log" aria-live="polite">{messages.length?messages.map((m,i)=><p key={i} className={'chat-message '+m.role}><strong className="sr-only">{m.role==='user'?'나':'LOOKIE'}: </strong>{m.text}</p>):<p className="muted">궁금한 야구 용어나 방금 장면을 물어보세요.</p>}{chatBusy&&<p role="status">답변을 준비하고 있어요…</p>}</div></section>}
     <form className="chat-input" onSubmit={ask}><input aria-label="야구 질문" placeholder="야구, 뭐든 물어보세요 (AI 챗봇 — 현재 경기 맥락 반영)" value={question} maxLength={500} onFocus={()=>setChatOpen(true)} onChange={e=>setQuestion(e.target.value)}/><button disabled={chatBusy||!question.trim()}>전송</button></form></div>

@@ -1,15 +1,34 @@
-import { useState } from 'react'
+// Flat baseball illustration: two separated curved seams with perpendicular stitches.
+// Geometry is shared between the seam curve and stitch placement so they stay aligned.
+const STITCH_COUNT = 11
+const STITCH_HALF_LENGTH = 4.6
+
+function Seam() {
+  return <g fill="none" stroke="#d93440">
+    <path d="M 21 15 C 39 35 39 65 21 85" strokeWidth="2.4" strokeLinecap="round" />
+    {Array.from({ length: STITCH_COUNT }, (_, index) => {
+      const t = 0.07 + index * 0.86 / (STITCH_COUNT - 1)
+      // Exact point and tangent of the cubic curve above.
+      const x = 21 + 54 * t * (1 - t)
+      const y = 15 + 60 * t + 30 * t * t - 20 * t * t * t
+      const dx = 54 * (1 - 2 * t)
+      const dy = 60 + 60 * t - 60 * t * t
+      const length = Math.hypot(dx, dy)
+      const nx = dy / length * STITCH_HALF_LENGTH
+      const ny = -dx / length * STITCH_HALF_LENGTH
+      return <path key={index} d={`M ${x - nx} ${y - ny} L ${x + nx} ${y + ny}`}
+        strokeWidth="2.8" strokeLinecap="butt" />
+    })}
+  </g>
+}
+
 export default function BaseballSpinner() {
- const [playing,setPlaying]=useState(true)
- return <div className="offline-motion">
-  <svg className={'offline-baseball '+(playing?'':'paused')} viewBox="0 0 100 100" width="80" height="80" aria-hidden="true" focusable="false">
-   <circle cx="50" cy="50" r="46" fill="#fff" stroke="#d7d7d7" strokeWidth="2"/>
-   <g fill="none" stroke="#bd3540" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M 19 17 Q 61 50 19 83 M 81 17 Q 39 50 81 83" stroke="#dea0a6" strokeWidth="1.5"/>
-    <path d="m 19 23 8 1 1-8 m-3 18 8 0-1-8 m-2 18 8-1-3-8 m-4 19 8-3-4-7 m-7 18 8-4-5-6 m-10 17 8-5-6-5 m-12 15 8-6-7-4"/>
-    <path d="m 81 23-8 1-1-8 m3 18-8 0 1-8 m2 18-8-1 3-8 m4 19-8-3 4-7 m7 18-8-4 5-6 m10 17-8-5 6-5 m12 15-8-6 7-4"/>
-   </g>
-  </svg>
-  <button className="text-button motion-toggle" aria-pressed={playing} onClick={()=>setPlaying(p=>!p)}>{playing?'야구공 회전 정지':'야구공 회전 재생'}</button>
- </div>
+  return <div className="offline-motion">
+    <svg className="offline-baseball" viewBox="0 0 100 100" width="100" height="100"
+      aria-hidden="true" focusable="false">
+      <circle cx="50" cy="50" r="46" fill="#fff" stroke="#c9c9c9" strokeWidth="1.5" />
+      <Seam />
+      <g transform="translate(100 0) scale(-1 1)"><Seam /></g>
+    </svg>
+  </div>
 }

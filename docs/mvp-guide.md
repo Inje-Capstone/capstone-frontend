@@ -1,3 +1,5 @@
+> 2026-11-02 정리: 초기 가짜 계정·로컬 퀴즈/보상 기능은 제거됐습니다. 현재 연결 상태는 [서버 연동 경계](backend-adapters.md)와 [백엔드 요청 사항](backend-integration-checklist.md)을 참고하세요. 아래 초기 구현 설명 중 시연 계정 부분은 현재 동작이 아닙니다.
+
 # LOOKIE 프론트엔드 MVP 사용 안내
 ## 시작
 `E:\frontDev\capstone-frontend`에서 `npm run dev`를 실행하고 터미널에 표시된 주소를 연다.
@@ -64,7 +66,7 @@ VITE_REPLAY_VIDEO_URL=/videos/확보한-경기.mp4
 
 ## 화면 범위와 미연결 기능
 구현 경로: /login, /signup, /password-reset, /onboarding, /, /watch/:gameId,
-/dictionary?term=, /quiz, /shop, /mypage, 기존 /api-test.
+/dictionary?term=, /quiz, /shop, /mypage, /offline. 초기 /api-test는 제거했습니다.
 비밀번호 재설정·변경과 실제 회원 탈퇴는 서버 API가 없어 화면만 제공하고 실제 완료를 표시하지 않는다.
 소셜 로그인은 현재 Figma 로그인 화면에 없고 이번 화면 구현에 포함하지 않았다.
 라이브 경기·북마크·'내가 배운 룰'은 구현 대상에서 제외했다.

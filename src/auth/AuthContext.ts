@@ -8,8 +8,6 @@ export type AuthState =
   | { status: 'error'; message: string }
 export interface AuthContextValue {
   state: AuthState
-  demo: boolean
-  startDemo: (options?: { reset?: boolean; nickname?: string; email?: string }) => void
   signIn: (credentials: LoginRequest) => Promise<void>
   completeOAuth: (code:string) => Promise<void>
   signOutToSplash: () => void

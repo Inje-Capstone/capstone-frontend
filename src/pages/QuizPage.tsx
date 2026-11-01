@@ -1,6 +1,5 @@
 import { useCallback,useRef,useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
 import { useProgress } from '../state/ProgressContext'
 import { quizService } from '../services/quizService'
 import { seoulDay } from '../data/choices'
@@ -12,11 +11,11 @@ import RewardStrip from '../components/RewardStrip'
 import DateRangePicker from '../components/DateRangePicker'
 import ResourceState from '../components/ResourceState'
 export default function QuizPage() {
- const {demo}=useAuth(),{applyConfirmedBalance,awardDemoPoints}=useProgress()
+ const {applyConfirmedBalance}=useProgress()
  const today=seoulDay(),[range,setRange]=useState(recentWeek),[day,setDay]=useState(today)
  const [index,setIndex]=useState(0),[choice,setChoice]=useState<string|null>(null),[oldest,setOldest]=useState(false)
  const [record,setRecord]=useState<DailyQuiz|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState('')
- const lock=useRef(false),submission=useRef<{key:string;id:string}|null>(null),applied=useRef(new Set<string>())
+ const lock=useRef(false),submission=useRef<{key:string;id:string}|null>(null)
  const history=useResource(useCallback((signal:AbortSignal)=>quizService.history(range,signal),[range]))
  const item=record?.questions[index],result=item?.result
  const correct=record?.questions.filter(q=>q.result?.correct).length||0
@@ -36,7 +35,6 @@ export default function QuizPage() {
    if(!receipt?.result || receipt.result.choiceId!==choice || !item.choices.some(c=>c.id===receipt.result.correctChoiceId) || !Number.isFinite(receipt.result.awardedPoints))throw Error('채점 응답을 확인하지 못했어요. 다시 시도해주세요.')
    setRecord({...record,questions:record.questions.map(q=>q.id===item.id?{...q,result:receipt.result}:q)})
    if(receipt.pointsBalance!==undefined)applyConfirmedBalance(receipt.pointsBalance)
-   else if(demo&&!applied.current.has(key)){awardDemoPoints(receipt.result.awardedPoints);applied.current.add(key)}
    history.retry()
   } catch(e){setError(getErrorMessage(e))}finally{lock.current=false;setBusy(false)}
  }
@@ -45,7 +43,7 @@ export default function QuizPage() {
   <button className="text-button sort-button" onClick={()=>setOldest(p=>!p)}>정렬 · {oldest?'오래된 순':'최신순'} ↕</button>
   <ResourceState {...history}/>
   <div className="history-list">{days.map(date=>{const h=history.data?.find(h=>h.date===date);return <button key={date} disabled={busy} className={'history-row '+(day===date?'selected':'')} onClick={()=>void load(date)}><strong>{date.slice(5).replace('-','/')}</strong><small>{h?`퀴즈 풀이 현황 (${h.answered}/${h.total})`:'오늘의 퀴즈 조회'}</small></button>})}</div>
-  <p className="muted small">{demo?'시연 전용 문제와 기기 내 기록':'서버에 저장된 퀴즈와 풀이 기록'}</p>
+  <p className="muted small">서버에 저장된 퀴즈와 풀이 기록</p>
  </aside><section className="quiz-question" aria-live="polite" aria-busy={busy}>
   {!record?<div className="quiz-intro"><p className="eyebrow">오늘 본 룰로 복습해요</p><h1>{day===today?'오늘의 퀴즈를 확인해보세요':'이 날짜의 퀴즈 기록을 확인해보세요'}</h1><p>문제 수와 보상은 조회된 퀴즈에 따라 표시돼요.</p><button disabled={busy} onClick={()=>void load(day)}>{busy?'문제를 불러오는 중…':'퀴즈 불러오기'}</button></div>:
   index>=record.questions.length?<div className="quiz-summary"><p className="eyebrow">복습 완료</p><h1>오늘도 야구와 한 걸음 가까워졌어요!</h1><strong className="diagnosis-score">{correct}<span> / {record.questions.length}</span></strong><p>획득한 포인트 {earned}P</p><div className="row"><Link className="button" to="/shop">상점 구경하기</Link><button className="secondary-button" onClick={()=>{setIndex(0);setChoice(null)}}>해설 다시 보기</button><Link to="/">홈으로</Link></div></div>:

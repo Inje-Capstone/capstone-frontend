@@ -4,8 +4,7 @@ export interface ProgressValue {
  progress:Progress; storageWarning:boolean
  savePlayback:(game:string,t:number)=>void; markSeen:(terms:string[])=>void
  addWatchSeconds:(seconds:number)=>void; setReview:(enabled:boolean)=>void; setCategories:(categories:string[])=>void
- applyConfirmedBalance:(balance:number)=>void; awardDemoPoints:(points:number)=>void; clearLocalData:()=>void
- buy:(id:string,price:number,kind:string)=>void; equip:(kind:string,id:string)=>void; reset:()=>void
+ applyConfirmedBalance:(balance:number)=>void; clearLocalData:()=>void
 }
 export const ProgressContext=createContext<ProgressValue|null>(null)
 export function useProgress() {
