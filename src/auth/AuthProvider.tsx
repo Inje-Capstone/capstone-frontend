@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { clearReconnect } from '../state/reconnect'
 import { exchangeOAuthCode } from '../api/oauthApi'
 import Splash from '../components/Splash'
 import { login } from '../api/authApi'
@@ -9,11 +10,9 @@ import { AuthContext } from './AuthContext'
 import type { AuthState } from './AuthContext'
 import { clearAccessToken, getAccessToken, setAccessToken, tokenExpiresAt } from './tokenStorage'
 import type { LoginRequest } from '../types/backend'
-import { freshAccount, isDemoSession, readDemo, saveDemo, setDemoSession } from '../demo/demoAccount'
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'checking' })
-  const [demo, setDemo] = useState(isDemoSession)
   const [splashDone,setSplashDone]=useState(()=>['/splash','/oauth/callback'].includes(window.location.pathname))
   const generation = useRef(0)
   const pending = useRef<AbortController | null>(null)
@@ -22,8 +21,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     generation.current += 1
     pending.current?.abort()
     clearAccessToken()
-    setDemoSession(false)
-    setDemo(false)
+    if(!expired)clearReconnect()
     setState({ status: 'anonymous', expired, redirectTo })
   }, [])
   const signOutToSplash = useCallback(() => endSession(false,'/splash'), [endSession])
@@ -32,10 +30,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = useCallback(async () => {
     const current = ++generation.current
     pending.current?.abort()
-    if (isDemoSession()) {
-      setState({ status: 'authenticated', onboarding: readDemo().onboarding, token: '' })
-      return
-    }
     const token = getAccessToken()
     if (!token) { setState({ status: 'anonymous', expired: false }); return }
     const expiresAt = tokenExpiresAt(token)
@@ -57,8 +51,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const current = ++generation.current
     const result = await login(credentials)
     if (current !== generation.current) return
-    setDemoSession(false)
-    setDemo(false)
     setAccessToken(result.accessToken)
     // If status lookup fails, preserve authentication and offer retry.
     await refreshSession()
@@ -68,25 +60,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const current=++generation.current
     const result=await exchangeOAuthCode(code)
     if(current!==generation.current)return
-    setDemoSession(false);setDemo(false);setAccessToken(result.accessToken)
+    setAccessToken(result.accessToken)
     await refreshSession()
   },[refreshSession])
-
-  const startDemo = useCallback((options: { reset?: boolean; nickname?: string; email?: string } = {}) => {
-    generation.current += 1
-    pending.current?.abort()
-    clearAccessToken()
-    const account = options.reset ? freshAccount() : readDemo()
-    if (options.reset) {
-      try { localStorage.removeItem('lookie.progress.v1.demo') } catch { /* Memory-only browser. */ }
-    }
-    if (options.nickname) account.profile.nickname = options.nickname
-    if (options.email) account.profile.email = options.email
-    saveDemo(account)
-    setDemoSession(true)
-    setDemo(true)
-    setState({ status: 'authenticated', onboarding: account.onboarding, token: '' })
-  }, [])
 
   useEffect(() => {
     let active = true
@@ -117,7 +93,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [state, endSession])
 
-  return <AuthContext.Provider value={{ state, demo, startDemo, signIn, completeOAuth, signOut, signOutToSplash, refreshSession }}>
+  return <AuthContext.Provider value={{ state, signIn, completeOAuth, signOut, signOutToSplash, refreshSession }}>
     {splashDone ? children : <Splash onContinue={()=>setSplashDone(true)}/>}
   </AuthContext.Provider>
 }

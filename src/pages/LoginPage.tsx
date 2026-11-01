@@ -4,6 +4,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ApiError, getErrorMessage } from '../api/apiClient'
 import { useAuth } from '../auth/AuthContext'
 import SessionStatus from '../auth/SessionStatus'
+import { reconnectDestination } from '../state/reconnect'
 import { returnPath } from '../auth/returnPath'
 import { oauthStartUrl } from '../api/oauthApi'
 import googleIcon from '../assets/brands/google-round.svg'
@@ -18,7 +19,8 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const inFlight = useRef(false)
-  const destination = returnPath(location.state)
+  const resumed = state.status==='authenticated' ? reconnectDestination() : '/'
+  const destination = resumed!=='/' ? resumed : returnPath(location.state)
   if (state.status === 'checking' || state.status === 'error') return <SessionStatus />
   if (state.status === 'authenticated') return <Navigate replace
     to={state.onboarding.onboardingCompleted ? destination : '/onboarding'} state={{ from: destination }} />

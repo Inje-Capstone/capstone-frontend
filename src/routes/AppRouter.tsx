@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import OAuthCallbackPage from '../pages/OAuthCallbackPage'
 import SplashPage from '../pages/SplashPage'
 import HomePage from '../pages/HomePage'
-import ApiTestPage from '../pages/ApiTestPage'
 import LoginPage from '../pages/LoginPage'
 import SignupPage from '../pages/SignupPage'
 import PasswordResetPage from '../pages/PasswordResetPage'
@@ -18,7 +17,7 @@ import AppLayout from '../components/AppLayout'
 import OfflineNotice from '../components/OfflineNotice'
 
 export default function AppRouter() {
- return <BrowserRouter><AuthProvider><OfflineNotice/><Routes>
+ return <BrowserRouter><OfflineNotice><AuthProvider><Routes>
   <Route path="/oauth/callback" element={<OAuthCallbackPage/>}/>
   <Route path="/splash" element={<SplashPage/>}/>
   <Route path="/login" element={<LoginPage/>}/>
@@ -33,7 +32,6 @@ export default function AppRouter() {
    <Route path="/shop" element={<ShopPage/>}/>
    <Route path="/mypage" element={<MyPage/>}/>
   </Route></Route>
-  <Route path="/api-test" element={<ApiTestPage/>}/>
   <Route path="*" element={<Navigate to="/" replace/>}/>
- </Routes></AuthProvider></BrowserRouter>
+ </Routes></AuthProvider></OfflineNotice></BrowserRouter>
 }

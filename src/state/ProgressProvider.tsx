@@ -4,19 +4,24 @@ import { ProgressContext } from './ProgressContext'
 import type { ProgressValue } from './ProgressContext'
 import type { Progress } from '../types/mvp'
 import { seoulDay } from '../data/choices'
-function newProgress(demo:boolean):Progress {
- return {points:demo?1240:0,inventory:demo?['LG-home']:[],equipped:demo?{jersey:'LG-home'}:{},quizzes:{},seenTerms:[],seenTermsByDay:{},playback:{},reviewEnabled:true,categories:['기본 룰'],watchSeconds:{}}
+function newProgress():Progress {
+ return {points:0,pointsBalanceConfirmed:false,inventory:[],equipped:{},seenTerms:[],seenTermsByDay:{},playback:{},reviewEnabled:true,categories:['기본 룰'],watchSeconds:{}}
 }
-function readProgress(key:string,demo:boolean):Progress {
+function readProgress(key:string):Progress {
  try {
   const value=JSON.parse(localStorage.getItem(key)||'null') as Progress|null
-  if(value&&Number.isFinite(value.points)&&value.points>=0&&Array.isArray(value.inventory)&&value.quizzes&&value.playback) return {...newProgress(demo),...value}
+  if(value&&Number.isFinite(value.points)&&value.points>=0&&Array.isArray(value.inventory)&&value.playback) {
+   const clean={...newProgress(),...value}
+   // Discard the retired local mock-quiz cache without touching playback/settings.
+   delete (clean as Progress & {quizzes?:unknown}).quizzes
+   return clean
+  }
  }catch{ /* Local records can be discarded if damaged. */ }
- return newProgress(demo)
+ return newProgress()
 }
-export default function ProgressProvider({children,accountKey,demo}:{children:ReactNode;accountKey:string;demo:boolean}) {
+export default function ProgressProvider({children,accountKey}:{children:ReactNode;accountKey:string}) {
  const storageKey='lookie.progress.v1.'+accountKey
- const [progress,setProgress]=useState(()=>readProgress(storageKey,demo))
+ const [progress,setProgress]=useState(()=>readProgress(storageKey))
  const [storageWarning,setStorageWarning]=useState(false)
  const cleared=useRef(false)
  useEffect(()=>{
@@ -33,17 +38,13 @@ export default function ProgressProvider({children,accountKey,demo}:{children:Re
   }),
   addWatchSeconds:seconds=>setProgress(p=>{
    const day=seoulDay(),before=p.watchSeconds[day]||0,after=Math.min(10800,before+Math.max(0,Math.min(seconds,2)))
-   return {...p,points:p.points+(demo?(Math.floor(after/1800)-Math.floor(before/1800))*10:0),watchSeconds:{...p.watchSeconds,[day]:after}}
+   return {...p,watchSeconds:{...p.watchSeconds,[day]:after}}
   }),
   setReview:reviewEnabled=>setProgress(p=>({...p,reviewEnabled})),
   setCategories:categories=>setProgress(p=>({...p,categories})),
-  applyConfirmedBalance:balance=>{if(Number.isFinite(balance)&&balance>=0)setProgress(p=>({...p,points:balance}))},
-  awardDemoPoints:points=>{if(demo&&Number.isFinite(points)&&points>=0)setProgress(p=>({...p,points:p.points+points}))},
+  applyConfirmedBalance:balance=>{if(Number.isFinite(balance)&&balance>=0)setProgress(p=>({...p,points:balance,pointsBalanceConfirmed:true}))},
   clearLocalData:()=>{cleared.current=true;try{localStorage.removeItem(storageKey)}catch{/* Session still ends if storage is unavailable. */}},
-  buy:(id,price,kind)=>setProgress(p=>p.inventory.includes(id)||p.points<price?p:{...p,points:p.points-price,inventory:[...p.inventory,id],equipped:{...p.equipped,[kind]:id}}),
-  equip:(kind,id)=>setProgress(p=>p.inventory.includes(id)?{...p,equipped:{...p.equipped,[kind]:id}}:p),
-  reset:()=>setProgress(newProgress(demo)),
- }),[demo,storageKey])
+ }),[storageKey])
  return <ProgressContext.Provider value={{progress,storageWarning,...actions}}>{children}</ProgressContext.Provider>
 }
 

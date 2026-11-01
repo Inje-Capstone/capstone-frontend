@@ -1,4 +1,4 @@
-import type { LearningLevel, OnboardingStatus, SupportedTeam } from './backend'
+import type { LearningLevel, SupportedTeam } from './backend'
 export interface Profile {
   userId: number; email: string | null; nickname: string
   learningLevel: LearningLevel | null; learningLevelDisplayName: string | null
@@ -29,13 +29,10 @@ export interface GameState {
 export interface ChatOut { answer: string; ok: boolean; source: string; context: string; used_event_ids: string[] }
 export interface TermSummary { id: string; name: string; category: string; category_label: string; aliases: string[]; summary: string }
 export interface Term extends TermSummary { level: number; body: string; levels: Record<string,string>; related: TermSummary[] }
-export interface QuizItem { id: string; term_id: string; question: string; choices: string[]; answer_index: number; explanation: string; source: string }
-export interface QuizRecord { items: QuizItem[]; answers: Record<string, number> }
 export interface Progress {
-  points: number; inventory: string[]; equipped: Record<string,string>
-  quizzes: Record<string,QuizRecord>; seenTerms: string[]; seenTermsByDay: Record<string,string[]>
+  points: number; pointsBalanceConfirmed: boolean; inventory: string[]; equipped: Record<string,string>
+  seenTerms: string[]; seenTermsByDay: Record<string,string[]>
   playback: Record<string,number>; reviewEnabled: boolean; categories: string[]
   watchSeconds: Record<string,number>
 }
-export interface DemoAccount { profile: Profile; onboarding: OnboardingStatus }
 

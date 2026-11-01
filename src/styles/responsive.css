@@ -6,7 +6,7 @@ html{font-size:clamp(16px,calc(10px + .5vw),24px)}
 #main-content>.page{flex:1}
 .home-page,.profile-page{min-height:0}
 .app-nav{padding-inline:clamp(1.25rem,2.7vw,5rem);flex-shrink:0}
-.demo-banner,.offline-banner,.storage-warning{flex-shrink:0}
+.storage-warning{flex-shrink:0}
 .game-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
 .featured-game{min-height:9rem}
 .game-card,.more-card{min-height:7rem}
@@ -34,10 +34,8 @@ html{font-size:clamp(16px,calc(10px + .5vw),24px)}
 .offline-card{max-width:25rem;width:100%;min-height:19rem;padding:1.5rem 1rem;gap:1rem}
 .offline-motion{display:flex;flex-direction:column;align-items:center;gap:.5rem;width:100%}
 .offline-baseball{display:block;width:5rem;height:5rem;flex:none;transform-origin:50% 50%;transform-box:fill-box;animation:offline-clockwise 3s linear infinite}
-.offline-baseball.paused{animation-play-state:paused}
-.motion-toggle{font-size:.6875rem;color:#888}
 @keyframes offline-clockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-/* Keep this small status indicator moving gently; it also has an explicit pause control. */
+/* Continuous CSS rotation; reduced-motion users get a slower speed. */
 @media(prefers-reduced-motion:reduce){.offline-baseball{animation-duration:8s}}
 @media(min-width:1800px){.home-page .game-grid{gap:1.25rem}.game-card,.more-card{min-height:8rem}.shop-preview .character-scene{transform:scale(2.2)}}
 @media(min-width:651px) and (max-width:1100px){
