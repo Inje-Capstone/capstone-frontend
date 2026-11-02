@@ -39,7 +39,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: 'checking' })
     try {
       const onboarding = await getOnboardingStatus(controller.signal)
-      if (current === generation.current) setState({ status: 'authenticated', onboarding, token })
+      if (current === generation.current) {
+        setSplashDone(true)
+        setState({ status: 'authenticated', onboarding, token })
+      }
     } catch (error) {
       if (current !== generation.current || controller.signal.aborted) return
       if (error instanceof ApiError && error.status === 401) endSession(true)
@@ -93,8 +96,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [state, endSession])
 
+  const showSplash =
+      !splashDone &&
+      state.status === 'anonymous' &&
+      !state.expired
+
   return <AuthContext.Provider value={{ state, signIn, completeOAuth, signOut, signOutToSplash, refreshSession }}>
-    {splashDone ? children : <Splash onContinue={()=>setSplashDone(true)}/>}
+    {showSplash
+        ? <Splash onContinue={() => setSplashDone(true)} />
+        : children}
   </AuthContext.Provider>
 }
 
