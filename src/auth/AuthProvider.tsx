@@ -10,8 +10,12 @@ import { AuthContext } from './AuthContext'
 import type { AuthState } from './AuthContext'
 import { clearAccessToken, getAccessToken, setAccessToken, tokenExpiresAt } from './tokenStorage'
 import type { LoginRequest } from '../types/backend'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [initialLocationKey] = useState(location.key)
   const [state, setState] = useState<AuthState>({ status: 'checking' })
   const [splashDone,setSplashDone]=useState(()=>['/splash','/oauth/callback'].includes(window.location.pathname))
   const generation = useRef(0)
@@ -98,13 +102,26 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const showSplash =
       !splashDone &&
+      location.key === initialLocationKey &&
       state.status === 'anonymous' &&
-      !state.expired
+      !state.expired &&
+      !state.redirectTo
 
-  return <AuthContext.Provider value={{ state, signIn, completeOAuth, signOut, signOutToSplash, refreshSession }}>
-    {showSplash
-        ? <Splash onContinue={() => setSplashDone(true)} />
-        : children}
-  </AuthContext.Provider>
+  function continueFromSplash() {
+    const from = location.pathname + location.search + location.hash
+    const isAuthPage = ['/login', '/signup', '/password-reset'].includes(location.pathname)
+
+    if (isAuthPage) {
+      navigate(from, { state: location.state })
+    } else {
+      navigate('/login', { state: { from } })
+    }
+  }
+
+  return (
+      <AuthContext.Provider value={{ state, signIn, completeOAuth, signOut, signOutToSplash, refreshSession }}>
+        {showSplash ? <Splash onContinue={continueFromSplash} /> : children}
+      </AuthContext.Provider>
+  )
 }
 
