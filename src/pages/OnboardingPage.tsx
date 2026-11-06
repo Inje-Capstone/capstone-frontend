@@ -13,7 +13,7 @@ import type { DiagnosisResult } from '../types/mvp'
 import type { SupportedTeam } from '../types/backend'
 
 export default function OnboardingPage() {
- const {state,refreshSession,signOut}=useAuth()
+ const {state,refreshSession,signOut,signOutToSplash}=useAuth()
  const initial=state.status==='authenticated'?state.onboarding:null
  const [status,setStatus]=useState(initial)
  const [step,setStep]=useState<'terms'|'diagnosis'|'result'|'team'>(()=>!initial?.requiredTermsAgreed?'terms':!initial.diagnosisCompleted?'diagnosis':'result')
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
  }
  const current=questions.data?.[question]
  return <main className="onboarding-page">
-  <header className="onboarding-top"><div className="row"><button className="text-button onboarding-back" aria-label="뒤로가기" disabled={busy} onClick={()=>{if(step==='diagnosis'){if(question)setQuestion(question-1);else setStep('terms')}else if(step==='team')setStep('result');else if(step==='result'){setQuestion(2);setStep('diagnosis')}else signOut()}}>‹ 뒤로</button><span className="wordmark">LOOKIE</span></div><span>처음 만나는 야구</span><button className="text-button" onClick={signOut}>로그아웃</button></header>
+  <header className="onboarding-top"><div className="row"><button className="text-button onboarding-back" aria-label="뒤로가기" disabled={busy} onClick={()=>{if(step==='diagnosis'){if(question)setQuestion(question-1);else setStep('terms')}else if(step==='team')setStep('result');else if(step==='result'){setQuestion(2);setStep('diagnosis')}else signOut()}}>‹ 뒤로</button><span className="wordmark">LOOKIE</span></div><span>처음 만나는 야구</span><button className="text-button" onClick={signOutToSplash}>로그아웃</button></header>
   <ol className="wizard-progress">{['약관 동의','수준 진단','진단 결과','응원팀'].map((name,i)=><li key={name} className={i===['terms','diagnosis','result','team'].indexOf(step)?'current':''}>{i+1}. {name}</li>)}</ol>
   <section className="onboarding-card" aria-labelledby="onboarding-title">
    {step==='terms'&&<><p className="eyebrow">시작하기 전에</p><h1 id="onboarding-title">약관에 동의해주세요</h1>

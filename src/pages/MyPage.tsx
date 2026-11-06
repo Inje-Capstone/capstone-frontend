@@ -11,7 +11,7 @@ import Modal from '../components/Modal'
 import type { LearningLevel,SupportedTeam } from '../types/backend'
 type Panel='nickname'|'level'|'team'|'categories'|'settings'|'password'|'delete'|'logout'|''
 export default function MyPage() {
- const {signOut,signOutToSplash,refreshSession}=useAuth(),{progress,setCategories,setReview,clearLocalData}=useProgress()
+ const {signOutToSplash,refreshSession}=useAuth(),{progress,setCategories,setReview,clearLocalData}=useProgress()
  const profile=useResource(useCallback(()=>getProfile(),[]))
  const teamOptions=useResource(useCallback(()=>getTeams(),[])),levelOptions=useResource(useCallback(()=>getLevels(),[]))
  const [panel,setPanel]=useState<Panel>(''),[value,setValue]=useState(''),[interest,setInterest]=useState(progress.categories)
@@ -53,7 +53,7 @@ export default function MyPage() {
  </div>}
  {panel==='password'&&<form onSubmit={e=>{e.preventDefault();setError('비밀번호 변경 API가 아직 연결되지 않았어요. 실제 비밀번호는 변경되지 않습니다.')}}><label>새 비밀번호<input type="password" required minLength={8} maxLength={20} autoComplete="new-password"/></label><label>새 비밀번호 확인<input type="password" required autoComplete="new-password"/></label><button>비밀번호 변경하기</button></form>}
  {panel==='delete'&&<><p className="withdrawal-copy">탈퇴하면 계정과 학습 기록이 삭제돼요.<br/>삭제된 정보는 복구할 수 없어요.</p><div className="withdrawal-actions"><button className="secondary-button" disabled={busy} onClick={()=>setPanel('')}>취소</button><button className="withdrawal-confirm" disabled={busy} onClick={()=>void withdraw()}>{busy?'처리 중…':'탈퇴하기'}</button></div></>}
- {panel==='logout'&&<><p>로그아웃할까요? 저장된 학습 기록은 유지돼요.</p><div className="row"><button onClick={signOut}>로그아웃</button><button className="secondary-button" onClick={()=>setPanel('')}>취소</button></div></>}
+ {panel==='logout'&&<><p>로그아웃할까요? 저장된 학습 기록은 유지돼요.</p><div className="row"><button onClick={signOutToSplash}>로그아웃</button><button className="secondary-button" onClick={()=>setPanel('')}>취소</button></div></>}
  {error&&<p role="alert" className="login-error">{error}</p>}
  </Modal>}
  </main>
