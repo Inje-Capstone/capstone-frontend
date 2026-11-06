@@ -50,7 +50,12 @@ export default function LoginPage() {
         <p>야구, 오늘 처음 봐도 괜찮아요</p>
       </header>
       {state.expired && <p className="login-notice" role="status">로그인이 만료되었어요. 다시 로그인해주세요.</p>}
-      <form className="login-form" onSubmit={submit} aria-busy={submitting}>
+      <form className="login-form" onInvalid={(event) => {
+        const input = event.target
+        if (input instanceof HTMLInputElement && input.validity.valueMissing) {
+          event.preventDefault()
+        }
+      }} onSubmit={submit} aria-busy={submitting}>
         <label className="sr-only" htmlFor="email">이메일</label>
         <input id="email" name="email" type="email" autoComplete="username" placeholder="이메일"
           required value={email} disabled={submitting} aria-describedby={error ? 'login-error' : undefined}
