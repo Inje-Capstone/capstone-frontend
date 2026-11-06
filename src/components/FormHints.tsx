@@ -10,7 +10,26 @@ function hint(input:HTMLInputElement,invalid=false) {
 export default function FormHints() {
  const [tip,setTip]=useState<{text:string;x:number;y:number}|null>(null)
  useEffect(()=>{
-  const show=(event:Event)=>{const input=event.target;if(!(input instanceof HTMLInputElement)||!['email','password','text'].includes(input.type)||!input.closest('form'))return;const rect=input.getBoundingClientRect();setTip({text:hint(input,event.type==='invalid'),x:Math.max(12,Math.min(rect.left,window.innerWidth-332)),y:rect.bottom+8})}
+  const show = (event: Event) => {
+   const input = event.target
+   if (
+       !(input instanceof HTMLInputElement) ||
+       !['email', 'password', 'text'].includes(input.type) ||
+       !input.closest('form')
+   ) return
+
+   if (event.type !== 'invalid' && input.form?.classList.contains('login-form')) {
+    setTip(null)
+    return
+   }
+
+   const rect = input.getBoundingClientRect()
+   setTip({
+    text: hint(input, event.type === 'invalid'),
+    x: Math.max(12, Math.min(rect.left, window.innerWidth - 332)),
+    y: rect.bottom + 8,
+   })
+  }
   const hide=()=>setTip(null)
   const invalid=(event:Event)=>{event.preventDefault();const input=event.target;if(!(input instanceof HTMLInputElement)||input.form?.querySelector('input:invalid')!==input)return;input.focus();show(event)}
   document.addEventListener('mouseover',show);document.addEventListener('focusin',show);document.addEventListener('invalid',invalid,true);document.addEventListener('input',show);document.addEventListener('mouseout',hide);document.addEventListener('focusout',hide);window.addEventListener('scroll',hide,true)
