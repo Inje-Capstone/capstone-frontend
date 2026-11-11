@@ -7,7 +7,6 @@ import { useProgress } from '../state/ProgressContext'
 import { useResource } from '../hooks/useResource'
 import * as service from '../services/gameService'
 import { reconnectTime,clearReconnect } from '../state/reconnect'
-import { demoGame } from '../demo/gameData'
 import { clock } from '../data/choices'
 import { getErrorMessage } from '../api/apiClient'
 import Modal from '../components/Modal'
@@ -18,7 +17,7 @@ export default function WatchPage() {
  const demo = isAiDemoMode()
  const navigate=useNavigate()
  const [time,setTime]=useState(()=>reconnectTime(gameId)??progress.playback[gameId]??0),[playing,setPlaying]=useState(false),[rate]=useState(1)
- const [duration,setDuration]=useState(600),[videoError,setVideoError]=useState('')
+ const [duration,setDuration]=useState(0),[videoError,setVideoError]=useState('')
  const [endModal,setEndModal]=useState(false),[simplified,setSimplified]=useState<Record<string,Card>>({}),[simplifying,setSimplifying]=useState('')
  const [expandedCard,setExpandedCard]=useState('')
  const [panelError,setPanelError]=useState(''),[question,setQuestion]=useState('')
@@ -36,9 +35,8 @@ export default function WatchPage() {
  const board=useResource(useCallback((signal:AbortSignal)=>service.state(gameId,bucket,signal),[gameId,bucket]))
  const matchupBucket=Math.floor(time/60)*60
  const matchup=useResource(useCallback((signal:AbortSignal)=>service.matchup(gameId,matchupBucket,signal),[gameId,matchupBucket]))
- const configured=gameId===import.meta.env.VITE_REPLAY_GAME_ID?import.meta.env.VITE_REPLAY_VIDEO_URL||'':''
- const source=configured
- const allowed=demo?gameId===demoGame.id:Boolean(configured&&game?.has_video)
+ const source=game?.playback?.kind==='recording'?game.playback.url:''
+ const allowed=Boolean(game?.playback)
  useEffect(()=>{if(game?.video_duration_sec)queueMicrotask(()=>setDuration(game.video_duration_sec))},[game])
  useEffect(()=>{
   if(cards.data?.cards.length)markSeen(cards.data.cards.slice(0,1).map(c=>c.term_id))
@@ -91,7 +89,7 @@ export default function WatchPage() {
     onPlay={()=>{setPlaying(true);setVideoError('')}} onPause={()=>setPlaying(false)} onEnded={finish} onError={()=>{setPlaying(false);setVideoError('영상 파일을 읽을 수 없어요. 파일 형식과 경로를 확인해주세요.')}} controls/>:
     <div className="video-placeholder"><small>녹화 경기 · 화면 시연</small><div><h1>{game.home_team} vs {game.away_team}</h1><p>실제 영상 미확보</p><p className="small">재생 버튼과 탐색 막대로 경기 설명을 확인해요.</p><button onClick={toggle} className="preview-play" aria-label={playing?'시연 일시정지':'시연 재생'}><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">{playing?<><rect x="5" y="4" width="5" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1" fill="currentColor"/></>:<path d="M6 4 L20 12 L6 20 Z" fill="currentColor"/>}</svg></button></div><span className="tag">시연 타임라인 {clock(time)}</span></div>}
    {videoError&&<p role="alert" className="login-error">{videoError}</p>}
-   <label className="sr-only" htmlFor="video-timeline">재생 위치</label><input id="video-timeline" type="range" min="0" max={duration||600} step="1" value={time} onChange={e=>seek(Number(e.target.value))}/>
+   <label className="sr-only" htmlFor="video-timeline">재생 위치</label><input id="video-timeline" type="range" min="0" max={duration} disabled={duration<=0} step="1" value={time} onChange={e=>seek(Number(e.target.value))}/>
    <div className="playback-status"><span className="small">{clock(time)} / {clock(duration)}</span><span className="scoreboard">{board.data?.scoreboard||'스코어보드 준비 중'}</span></div>
    <div className="chat-box"><section className="chat-history" aria-label="AI 대화"><strong>AI 챗봇 {demo&&<small className="muted">· 준비된 시연 응답</small>}</strong>
     <div className="messages" role="log" aria-live="polite">{messages.map((m,i)=><p key={i} className={'chat-message '+m.role}><strong className="sr-only">{m.role==='user'?'나':'LOOKIE'}: </strong>{m.text}</p>)}{chatBusy&&<p role="status">답변을 준비하고 있어요…</p>}</div></section>

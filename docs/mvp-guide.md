@@ -76,12 +76,12 @@ VITE_REPLAY_VIDEO_URL=/videos/확보한-경기.mp4
 ## 소스 구성
 - src/auth: 실제 로그인 세션 및 명시적 시연 진입
 - src/api: Spring 요청 및 AI 전용 클라이언트
-- src/services/gameService.ts: 실제 AI와 시연 데이터 선택 경계
+- src/services/gameService.ts: 실제 AI와 시연 구현 선택 경계. 공통 인터페이스는 gameServiceContract.ts, 실제 호출은 aiGameService.ts
 - src/demo: 시연 계정·경기·진단·퀴즈 데이터
 - src/state: 계정별 기기 내 학습·포인트·구매 기록
 - src/pages: 화면과 사용자 동작
 - src/components: 공통 메뉴·모달·오류·오프라인 안내·캐릭터
-- src/data/glossarySeed.ts: AI 저장소 main 749bc2f의 용어 시드 109개 재사용
+- src/demo/glossarySeed.ts: AI 저장소 main 749bc2f의 용어 시드 109개를 시연 구현에서만 재사용. [전환/제거 안내](ai-data-transition.md)
 - src/assets/fonts: Figma의 42dot Sans와 OFL 라이선스
 - src/assets/figma/calendar.png: Figma 제공 아이콘
 
