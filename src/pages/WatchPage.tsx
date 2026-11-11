@@ -21,13 +21,14 @@ export default function WatchPage() {
  const [duration,setDuration]=useState(600),[videoError,setVideoError]=useState('')
  const [endModal,setEndModal]=useState(false),[simplified,setSimplified]=useState<Record<string,Card>>({}),[simplifying,setSimplifying]=useState('')
  const [expandedCard,setExpandedCard]=useState('')
- const [panelError,setPanelError]=useState(''),[chatOpen,setChatOpen]=useState(false),[question,setQuestion]=useState('')
+ const [panelError,setPanelError]=useState(''),[question,setQuestion]=useState('')
  const [messages,setMessages]=useState<{role:'user'|'assistant';text:string}[]>([]),[chatBusy,setChatBusy]=useState(false)
  const video=useRef<HTMLVideoElement>(null),timeRef=useRef(time),chatLock=useRef(false)
  const level=auth.status==='authenticated'?auth.onboarding.learningLevel:null
  const games=useResource(useCallback((signal:AbortSignal)=>service.listGames(signal),[]))
  const glossary=useResource(useCallback((signal:AbortSignal)=>service.listTerms(signal),[]))
  const game=games.data?.find(g=>g.id===gameId)
+ const keyword=(card:Card)=>glossary.data?.find(term=>term.id===card.term_id)?.name||card.term_id
  const bucket=Math.floor(time/5)*5
  const categoryKey=progress.categories.join('|')
  const cards=useResource(useCallback((signal:AbortSignal)=>service.cards(gameId,bucket,level,signal,categoryKey.split('|').filter(Boolean)),[gameId,bucket,level,categoryKey]))
@@ -73,7 +74,7 @@ export default function WatchPage() {
  }
  async function ask(event:FormEvent) {
   event.preventDefault();if(!question.trim()||chatLock.current)return
-  const text=question.trim();setQuestion('');setChatOpen(true);setChatBusy(true);chatLock.current=true
+  const text=question.trim();setQuestion('');setChatBusy(true);chatLock.current=true
   setMessages(m=>[...m,{role:'user',text}])
   try{const out=await service.chat(gameId,time,text,level,progress.categories);setMessages(m=>[...m,{role:'assistant',text:out.ok?out.answer:'답변을 준비하지 못했어요. 다시 질문해주세요.'}])}
   catch(e){setMessages(m=>[...m,{role:'assistant',text:getErrorMessage(e)}])}
@@ -88,22 +89,22 @@ export default function WatchPage() {
     onLoadedMetadata={()=>{if(video.current&&Number.isFinite(video.current.duration)&&video.current.duration>0){setDuration(video.current.duration);video.current.currentTime=Math.min(timeRef.current,video.current.duration);video.current.playbackRate=rate}}}
     onTimeUpdate={()=>{if(video.current){const t=video.current.currentTime;timeRef.current=t;setTime(t);savePlayback(gameId,t);clearReconnect()}}}
     onPlay={()=>{setPlaying(true);setVideoError('')}} onPause={()=>setPlaying(false)} onEnded={finish} onError={()=>{setPlaying(false);setVideoError('영상 파일을 읽을 수 없어요. 파일 형식과 경로를 확인해주세요.')}} controls/>:
-    <div className="video-placeholder"><small>녹화 경기 · 화면 시연</small><div><h1>{game.home_team} vs {game.away_team}</h1><p>실제 영상 미확보</p><p className="small">재생 버튼과 탐색 막대로 경기 설명을 확인해요.</p><button onClick={toggle} className="preview-play" aria-label={playing?'시연 일시정지':'시연 재생'}>{playing?<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="5" y="3" width="5" height="18" rx="1" fill="currentColor"/><rect x="14" y="3" width="5" height="18" rx="1" fill="currentColor"/></svg>:'▶'}</button></div><span className="tag">시연 타임라인 {clock(time)}</span></div>}
+    <div className="video-placeholder"><small>녹화 경기 · 화면 시연</small><div><h1>{game.home_team} vs {game.away_team}</h1><p>실제 영상 미확보</p><p className="small">재생 버튼과 탐색 막대로 경기 설명을 확인해요.</p><button onClick={toggle} className="preview-play" aria-label={playing?'시연 일시정지':'시연 재생'}><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">{playing?<><rect x="5" y="4" width="5" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1" fill="currentColor"/></>:<path d="M6 4 L20 12 L6 20 Z" fill="currentColor"/>}</svg></button></div><span className="tag">시연 타임라인 {clock(time)}</span></div>}
    {videoError&&<p role="alert" className="login-error">{videoError}</p>}
    <label className="sr-only" htmlFor="video-timeline">재생 위치</label><input id="video-timeline" type="range" min="0" max={duration||600} step="1" value={time} onChange={e=>seek(Number(e.target.value))}/>
    <div className="playback-status"><span className="small">{clock(time)} / {clock(duration)}</span><span className="scoreboard">{board.data?.scoreboard||'스코어보드 준비 중'}</span></div>
-   <div className="chat-box">{chatOpen&&<section className="chat-history" aria-label="AI 대화"><div className="between"><strong>AI 챗봇 {demo&&<small className="muted">· 준비된 시연 응답</small>}</strong><button className="text-button" onClick={()=>setChatOpen(false)}>접기</button></div>
-    <div className="messages" role="log" aria-live="polite">{messages.length?messages.map((m,i)=><p key={i} className={'chat-message '+m.role}><strong className="sr-only">{m.role==='user'?'나':'LOOKIE'}: </strong>{m.text}</p>):<p className="muted">궁금한 야구 용어나 방금 장면을 물어보세요.</p>}{chatBusy&&<p role="status">답변을 준비하고 있어요…</p>}</div></section>}
-    <form className="chat-input" onSubmit={ask}><input aria-label="야구 질문" placeholder="야구, 뭐든 물어보세요 (AI 챗봇 — 현재 경기 맥락 반영)" value={question} maxLength={500} onFocus={()=>setChatOpen(true)} onChange={e=>setQuestion(e.target.value)}/><button disabled={chatBusy||!question.trim()}>전송</button></form></div>
+   <div className="chat-box"><section className="chat-history" aria-label="AI 대화"><strong>AI 챗봇 {demo&&<small className="muted">· 준비된 시연 응답</small>}</strong>
+    <div className="messages" role="log" aria-live="polite">{messages.map((m,i)=><p key={i} className={'chat-message '+m.role}><strong className="sr-only">{m.role==='user'?'나':'LOOKIE'}: </strong>{m.text}</p>)}{chatBusy&&<p role="status">답변을 준비하고 있어요…</p>}</div></section>
+    <form className="chat-input" data-form-hints="off" onSubmit={ask}><input aria-label="야구 질문" value={question} maxLength={500} onChange={e=>setQuestion(e.target.value)}/><button disabled={chatBusy||!question.trim()}>전송</button></form></div>
   </section>
   <aside className="watch-aside">
    <section className="ai-card-panel"><span className="ai-panel-label">AI 설명 카드 (자동 감지)</span><ResourceState {...cards}/>
     {cards.data?.degraded&&<p role="status">설명을 준비하지 못했어요. 잠시 후 다시 시도해주세요.</p>}
     {cards.data&&!cards.data.cards.length&&<p className="muted">설명할 장면을 기다리고 있어요.</p>}
-    {cards.data?.cards.slice(0,1).map(original=>{const card=simplified[original.id]||original;return <article className="explanation-card" key={original.id}><div className="between"><h2>{expandedCard===original.id?card.title:'감지된 키워드'}</h2><button className="text-button" onClick={()=>seek(card.t)}>{clock(card.t)}</button></div><div className="card-keywords"><span className="chip">{glossary.data?.find(term=>term.id===card.term_id)?.name||card.title}</span></div>{expandedCard!==original.id?<button className="card-cta" onClick={()=>setExpandedCard(original.id)}>이 장면 설명 보기 →</button>:<><p>{card.body}</p><div className="between"><button className="text-button" disabled={!card.can_simplify||simplifying===card.id} onClick={async()=>{
+    {cards.data?.cards.slice(0,1).map(original=>{const card=simplified[original.id]||original;return <article className="explanation-card" key={original.id}><h2>감지된 키워드</h2><div className="card-keywords"><span className="chip">{keyword(card)}</span></div>{expandedCard!==original.id?<button className="card-cta" aria-expanded={false} aria-controls="scene-explanation" onClick={()=>setExpandedCard(original.id)}>이 장면 설명 보기 →</button>:<div id="scene-explanation"><p>{card.body}</p><div className="row card-actions"><button className="secondary-button small-button" disabled={!card.can_simplify||simplifying===card.id} onClick={async()=>{
      setSimplifying(card.id);setPanelError('');try{const out=await service.simplify(gameId,card);setSimplified(p=>({...p,[original.id]:out}))}catch(e){setPanelError(getErrorMessage(e))}finally{setSimplifying('')}
-    }}>{card.can_simplify?'더 쉽게 설명해줘':'가장 쉬운 설명이에요'}</button><Link to={'/dictionary?term='+encodeURIComponent(card.term_id)} state={{watch:gameId}}>용어 ↗</Link></div><details><summary>설명 근거</summary>{card.reasons.map((r,i)=><p className="small muted" key={i}>{r}</p>)}</details><button className="text-button" onClick={()=>setExpandedCard('')}>설명 접기</button></>}</article>})}
-    {cards.data&&cards.data.cards.length>1&&<details className="card-history"><summary>이전 설명 {cards.data.cards.length-1}개</summary>{cards.data.cards.slice(1).map(card=><button key={card.id} className="text-button" onClick={()=>seek(card.t)}>{clock(card.t)} · {card.title}</button>)}</details>}
+    }}>{card.can_simplify?'더 쉽게 설명해줘':'가장 쉬운 설명이에요'}</button><Link className="button secondary-button small-button" to={'/dictionary?term='+encodeURIComponent(card.term_id)} state={{watch:gameId}}>용어 보기 ↗</Link></div><details className="explanation-reasons"><summary>설명 근거</summary>{card.reasons.map((r,i)=><p className="small muted" key={i}>{r}</p>)}</details><button className="card-cta" aria-expanded={true} aria-controls="scene-explanation" onClick={()=>setExpandedCard('')}>이 장면 설명 접기 ↑</button></div>}</article>})}
+    {cards.data&&cards.data.cards.length>1&&<details className="card-history"><summary>이전 키워드 {cards.data.cards.length-1}개</summary><div className="chips">{cards.data.cards.slice(1).map(card=><button key={card.id} className="chip" onClick={()=>seek(card.t)}>{keyword(card)}</button>)}</div></details>}
     {panelError&&<p role="alert" className="login-error">{panelError}</p>}
    </section>
    <details className="analysis-panel" open><summary>선수 · 매치업 분석 <small>타석 교체 시 갱신</small></summary><ResourceState {...matchup}/>

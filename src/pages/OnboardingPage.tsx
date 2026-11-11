@@ -9,6 +9,7 @@ import { levels } from '../data/choices'
 import { useResource } from '../hooks/useResource'
 import ResourceState from '../components/ResourceState'
 import Modal from '../components/Modal'
+import TeamIdentity from '../components/TeamIdentity'
 import type { DiagnosisResult } from '../types/mvp'
 import type { SupportedTeam } from '../types/backend'
 
@@ -52,7 +53,7 @@ export default function OnboardingPage() {
    </>}
    {step==='result'&&result&&<><p className="eyebrow">수준 진단 결과</p><h1 id="onboarding-title">{levels.find(l=>l.code===result.learningLevel)?.displayName} 야구 팬이에요!</h1><div className="diagnosis-score">{result.correctCount}<span> / {result.totalCount}</span></div><p>지금 수준에 맞춰 야구를 설명해드릴게요.</p><p className="muted small">수준은 나중에 마이페이지에서 바꿀 수 있어요.</p><button disabled={busy} onClick={()=>{if(shouldAskTeam(result.learningLevel))setStep('team');else void action(async()=>{await chooseTeam('NONE');await completeOnboarding();await refreshSession()})}}>{shouldAskTeam(result.learningLevel)?'응원팀 선택하기':'시작하기 → 홈'}</button><button className="text-button" onClick={()=>{setQuestion(0);setStep('diagnosis')}}>다시 풀어보기</button></>}
    {step==='team'&&<><p className="eyebrow">마지막 단계</p><h1 id="onboarding-title">응원하는 팀이 있나요?</h1><ResourceState {...teamOptions}/>
-    <div className="team-grid">{teamOptions.data?.filter(t=>t.code!=='NONE').map(t=><button key={t.code} className={'team-option '+(team===t.code?'selected':'')} aria-pressed={team===t.code} title={t.displayName} onClick={()=>setTeam(t.code)}>{t.displayName.split(' ')[0]}</button>)}</div>
+    <div className="team-grid">{teamOptions.data?.filter(t=>t.code!=='NONE').map(t=><button key={t.code} className={'team-option '+(team===t.code?'selected':'')} aria-pressed={team===t.code} disabled={busy} onClick={()=>setTeam(t.code)}><TeamIdentity team={t.code} name={t.displayName}/></button>)}</div>
     <button className={'option '+(team==='NONE'?'selected':'')} aria-pressed={team==='NONE'} onClick={()=>setTeam('NONE')}>아직 없어요</button>
     <div className="row wizard-buttons"><button disabled={!team||busy} onClick={()=>void action(async()=>{await chooseTeam(team!);await completeOnboarding();await refreshSession()})}>{busy?'저장 중…':'시작하기 → 홈'}</button></div></>}
    {error&&<p className="login-error" role="alert">{error}</p>}

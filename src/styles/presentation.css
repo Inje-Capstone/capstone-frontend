@@ -13,3 +13,64 @@
 .hint-warning{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:1.2em;height:1.2em;border-radius:50%;background:#bd343a;color:#fff;font-weight:800}
 @media(max-width:900px){.splash-welcome{--seam-inset:7vw}}
 @media(prefers-reduced-motion:reduce){.splash-welcome .seam-stitch{animation-duration:36s;animation-delay:calc(var(--stitch-delay) * 2)}.connection-screen .offline-baseball{animation-duration:12s}}
+
+/* Shared action treatment, including actions previously rendered as bare text. */
+.text-button{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;min-height:2.25rem;padding:.45rem .8rem;border:1px solid #c8c8c8;border-radius:.375rem;background:#fff;color:#444;line-height:1.35;text-align:center;text-decoration:none}
+.text-button:hover{background:#f3f3f3;text-decoration:none}
+.text-button:disabled{opacity:.45}
+.login-links a,.center-link{display:inline-flex;align-items:center;justify-content:center;min-height:2.25rem;padding:.45rem .7rem;border:1px solid #d5d5d5;border-radius:.375rem;background:#fff;line-height:1.35;text-decoration:none}
+.center-link{display:flex;width:max-content;max-width:100%}
+.admin-login{width:100%;margin-top:.25rem;font-size:.8125rem}
+.preview-play{width:3.5rem;height:3.5rem;padding:0}
+.preview-play svg{display:block;width:1.75rem;height:1.75rem;flex:none}
+.chat-history .messages{min-height:9rem;max-height:18rem;overflow-y:auto;padding-block:.75rem}
+.card-actions{margin-block:1rem}
+.explanation-card .card-cta{margin-top:.75rem}
+.explanation-reasons>summary,.card-history>summary,.analysis-panel>summary{padding:.6rem .75rem;border:1px solid #ccc;border-radius:.375rem;background:#fafafa;color:#444;cursor:pointer;line-height:1.4}
+.card-history .chips{margin-top:.75rem}
+.dictionary-sort .chip{gap:.5rem}
+.quiz-layout{grid-template-columns:minmax(0,8fr) minmax(0,2fr);gap:1.5rem;align-items:start}
+.quiz-question{width:100%;padding:clamp(1rem,2.5vw,2.5rem);border:1px solid var(--border);border-radius:.75rem;min-height:26rem}
+.quiz-question .answer-options{max-width:44rem}
+.quiz-question>h1{max-width:50rem}
+.quiz-history{border-left:1px solid #e5e5e5;padding-left:1rem}
+.quiz-history>h2{margin-bottom:1rem}
+.quiz-attempt-summary dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.35rem;margin:0 0 1rem}
+.quiz-attempt-summary dl>div{padding:.65rem .25rem;border:1px solid #e2e2e2;border-radius:.4rem;text-align:center;min-width:0}
+.quiz-attempt-summary dt{font-size:.65rem;color:#777}.quiz-attempt-summary dd{margin:.35rem 0 0;font-size:1rem;font-weight:700;overflow-wrap:anywhere}.quiz-attempt-summary dd span{margin-left:.15rem;font-size:.65rem;font-weight:400}
+.quiz-history-filters{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem}.quiz-history-filters .chip{flex:1;padding:.4rem .45rem;font-size:.75rem}
+.quiz-history-limit{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.75rem;margin-bottom:.75rem}.quiz-history-limit select{width:auto;padding:.4rem .65rem;font-size:.75rem}
+.quiz-attempt-list{max-height:28rem;overflow-y:auto;overflow-wrap:anywhere}
+.quiz-attempt-list .empty-state,.quiz-attempt-summary .empty-state{padding:1rem .25rem;font-size:.75rem}
+.quiz-attempt{padding:.85rem .25rem;border-bottom:1px solid #e2e2e2}.quiz-attempt strong{font-size:.8rem}.quiz-attempt .small{margin:.4rem 0;color:#666}
+.attempt-result{font-size:.65rem;padding:.15rem .35rem;border-radius:.25rem;background:#f0f0ed;white-space:nowrap}.attempt-result.correct{color:#42603c;background:#eef3ec}.attempt-result.incorrect{color:#903d3d;background:#fbefed}
+.attempt-question{font-size:.7rem;margin-top:.4rem}.quiz-attempt time{font-size:.65rem;color:#888}.quiz-history-note{margin:1rem 0 .75rem}
+.quiz-history .sort-button{width:100%;margin-block:.75rem}
+.quiz-history .date-range-trigger{height:auto;min-height:2.75rem;gap:.4rem;flex-wrap:wrap;font-size:.75rem}
+.quiz-history .range-calendar{width:min(18.375rem,calc(100vw - 3rem))}
+.profile-link{display:inline-flex;border-radius:50%}
+.profile-avatar{display:grid;place-items:center;overflow:hidden;background:#fff;border:1px solid #ddd}
+.profile-avatar img{display:block;width:100%;height:100%;padding:.2rem;object-fit:contain}
+.profile-avatar.large img{padding:.35rem}
+.profile-avatar svg{width:75%;height:75%;fill:#969696}
+.team-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:.65rem}
+.team-grid .team-option,.team-grid .team-option.selected{height:auto;min-height:6.25rem;padding:.65rem .25rem;border:1px solid #ddd;border-radius:.6rem;transition:background .15s,border-color .15s}
+.team-grid .team-option.selected{border-color:#333;background:#f0f0ed;box-shadow:inset 0 0 0 1px #333}
+.team-identity{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;width:100%;min-width:0}
+.team-emblem{display:grid;place-items:center;width:100%;height:3.25rem}
+.team-emblem img{display:block;width:100%;height:3.25rem;max-width:100%;max-height:3.25rem;min-width:0;min-height:0;object-fit:contain}
+.team-name{font-size:.65rem;font-weight:600;line-height:1.4;color:#444;text-align:center;word-break:keep-all}
+.team-grid+.option{margin-bottom:1rem;justify-content:center}
+.onboarding-card:has(.team-grid){width:min(40rem,100%)}
+/* Fill the SVG viewport vertically instead of letterboxing its 240:900 viewBox. */
+.splash-welcome .splash-seam{top:-3%;height:106%;width:clamp(5rem,18vw,25rem)}
+.splash-welcome .splash-seam.left{left:var(--seam-inset)}
+.splash-welcome .splash-seam.right{right:var(--seam-inset)}
+@media(max-width:900px){.quiz-layout{gap:1rem}.quiz-history{padding-left:.75rem}.quiz-question{padding:1.25rem}.team-grid{gap:.5rem}}
+@media(max-width:650px){
+ .quiz-layout{display:flex;flex-direction:column}.quiz-question{min-height:22rem}.quiz-history{width:100%;border-left:0;border-top:1px solid #ddd;padding:1rem 0 0}
+ .quiz-history .history-list{display:flex;max-height:8rem}.quiz-history .history-row{flex:none}
+ .team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.team-name{font-size:.75rem}
+ .splash-welcome .splash-seam{width:22vw;opacity:.5}.splash-welcome .splash-seam.left{left:1vw}.splash-welcome .splash-seam.right{right:1vw}
+ .splash-welcome .splash-content{max-width:70vw}
+}

@@ -4,8 +4,10 @@ import { Link,NavLink,Outlet,useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import ProgressProvider from '../state/ProgressProvider'
 import { useProgress } from '../state/ProgressContext'
+import ProfileAvatar from './ProfileAvatar'
 function Layout() {
  const {storageWarning}=useProgress()
+ const {state}=useAuth()
  const location=useLocation()
  useEffect(()=>{clearReconnect()},[location.pathname,location.search])
  const watching=location.pathname.startsWith('/watch/')
@@ -15,7 +17,7 @@ function Layout() {
   <header className="app-nav"><Link to="/" className="wordmark">LOOKIE</Link>
    <nav aria-label="주요 메뉴">{[['/','홈'],['/dictionary','용어 사전'],['/quiz','퀴즈'],['/shop','상점'],['/mypage','마이페이지']].map(([to,label])=>
     <NavLink key={to} end={to==='/'} to={to} className={({isActive})=>(isActive||(to==='/'&&watching))?'active':''}>{label}</NavLink>)}</nav>
-   <div className="nav-right">{watching&&<button className="secondary-button small-button" type="submit" form="end-watch">시청 종료</button>}<Link to="/mypage" className="avatar" aria-label="내 프로필"/></div>
+   <div className="nav-right">{watching&&<button className="secondary-button small-button" type="submit" form="end-watch">시청 종료</button>}<Link to="/mypage" className="profile-link" aria-label="내 프로필"><ProfileAvatar team={state.status==='authenticated'?state.onboarding.supportedTeam:null}/></Link></div>
   </header>
   <div id="main-content"><Outlet/></div>
  </>
