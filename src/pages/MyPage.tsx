@@ -8,6 +8,8 @@ import { useResource } from '../hooks/useResource'
 import { categories,levels,teams } from '../data/choices'
 import ResourceState from '../components/ResourceState'
 import Modal from '../components/Modal'
+import ProfileAvatar from '../components/ProfileAvatar'
+import TeamIdentity from '../components/TeamIdentity'
 import type { LearningLevel,SupportedTeam } from '../types/backend'
 type Panel='nickname'|'level'|'team'|'categories'|'settings'|'password'|'delete'|'logout'|''
 export default function MyPage() {
@@ -29,7 +31,7 @@ export default function MyPage() {
  }
  const user=profile.data
  return <main className="page profile-page"><div className="profile-content"><ResourceState {...profile}/>
- {user&&<><header className="profile-heading"><div className="avatar large"/><div><button className="text-button nickname-button" onClick={()=>open('nickname',user.nickname)}>{user.nickname} <small>수정</small></button><p className="muted small">{user.email||'이메일 미제공'}</p></div></header>
+ {user&&<><header className="profile-heading"><ProfileAvatar team={user.supportedTeam} large/><div><button className="text-button nickname-button" onClick={()=>open('nickname',user.nickname)}>{user.nickname} <small>수정</small></button><p className="muted small">{user.email||'이메일 미제공'}</p></div></header>
  <div className="profile-rows">
   <button className="profile-row" onClick={()=>open('level',user.learningLevel||'INTRODUCTORY')}><span>야구 지식 수준</span><span>{user.learningLevelDisplayName||levels.find(l=>l.code===user.learningLevel)?.displayName||'미설정'} <b>변경 ›</b></span></button>
   <button className="profile-row" onClick={()=>{setInterest(progress.categories);open('categories')}}><span>관심 카테고리</span><span>{progress.categories.join(', ')||'전체'} <b>변경 ›</b></span></button>
@@ -43,7 +45,7 @@ export default function MyPage() {
  {panel&&<Modal className={panel==='settings'?'settings-modal':panel==='delete'?'withdrawal-modal':''} title={{nickname:'닉네임 변경',level:'야구 지식 수준',team:'응원팀 선택',categories:'관심 카테고리',settings:'설정',password:'비밀번호 변경',delete:'정말 탈퇴하시겠어요?',logout:'로그아웃'}[panel]} onClose={()=>{if(!busy)setPanel('')}}>
  {panel==='nickname'&&<form onSubmit={e=>{e.preventDefault();if(value.trim().length<2){setError('닉네임은 2~20자로 입력해주세요.');return}void save('nickname',value.trim(),false)}}><label>닉네임<input required minLength={2} maxLength={20} value={value} onChange={e=>setValue(e.target.value)}/></label><button disabled={busy}>저장</button></form>}
  {panel==='level'&&<><ResourceState {...levelOptions}/><div className="answer-options">{levelOptions.data?.map(l=><button key={l.code} className={'option '+(value===l.code?'selected':'')} onClick={()=>setValue(l.code)}>{l.displayName}</button>)}</div><button disabled={busy} onClick={()=>void save('learning-level',value as LearningLevel)}>저장</button></>}
- {panel==='team'&&<><ResourceState {...teamOptions}/><div className="team-grid">{teamOptions.data?.map(t=><button key={t.code} className={'team-option '+(value===t.code?'selected':'')} onClick={()=>setValue(t.code||'NONE')}>{t.displayName.split(' ')[0]}</button>)}</div><button disabled={busy} onClick={()=>void save('supported-team',value as SupportedTeam)}>저장</button></>}
+ {panel==='team'&&<><ResourceState {...teamOptions}/><div className="team-grid">{teamOptions.data?.filter(t=>t.code&&t.code!=='NONE').map(t=><button key={t.code} className={'team-option '+(value===t.code?'selected':'')} aria-pressed={value===t.code} disabled={busy} onClick={()=>setValue(t.code||'NONE')}><TeamIdentity team={t.code} name={t.displayName}/></button>)}</div>{teamOptions.data?.some(t=>t.code==='NONE')&&<button className={'option '+(value==='NONE'?'selected':'')} aria-pressed={value==='NONE'} disabled={busy} onClick={()=>setValue('NONE')}>아직 없어요</button>}<button disabled={busy||!value} onClick={()=>void save('supported-team',value as SupportedTeam)}>저장</button></>}
  {panel==='categories'&&<><div className="chips">{categories.map(c=><button key={c} className={'chip '+(interest.includes(c)?'active':'')} aria-pressed={interest.includes(c)} onClick={()=>setInterest(interest.includes(c)?interest.filter(x=>x!==c):[...interest,c])}>{c}</button>)}</div><p className="muted small">관심 카테고리는 이 기기에 저장돼요.</p><button onClick={()=>{setCategories(interest);setPanel('')}}>저장</button></>}
  {panel==='settings'&&<div className="settings-list">
   <button className={'setting-button '+(progress.reviewEnabled?'enabled':'')} role="switch" aria-checked={progress.reviewEnabled} onClick={()=>setReview(!progress.reviewEnabled)}>시청 후 룰 복습 <strong>{progress.reviewEnabled?'ON':'OFF'}</strong></button>

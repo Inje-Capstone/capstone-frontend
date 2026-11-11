@@ -50,14 +50,14 @@ export default function LoginPage() {
         <p>야구, 오늘 처음 봐도 괜찮아요</p>
       </header>
       {state.expired && <p className="login-notice" role="status">로그인이 만료되었어요. 다시 로그인해주세요.</p>}
-      <form className="login-form" onSubmit={submit} aria-busy={submitting}>
+      <form className="login-form" data-form-hints="validation-only" onSubmit={submit} aria-busy={submitting}>
         <label className="sr-only" htmlFor="email">이메일</label>
         <input id="email" name="email" type="email" autoComplete="username" placeholder="이메일"
-               aria-required="true" value={email} disabled={submitting} aria-describedby={error ? 'login-error' : undefined}
+          aria-required="true" value={email} disabled={submitting} aria-describedby={error ? 'login-error' : undefined}
           onChange={event => setEmail(event.target.value)} />
         <label className="sr-only" htmlFor="password">비밀번호</label>
         <input id="password" name="password" type="password" autoComplete="current-password" placeholder="비밀번호"
-               aria-required="true" value={password} disabled={submitting} aria-describedby={error ? 'login-error' : undefined}
+          aria-required="true" value={password} disabled={submitting} aria-describedby={error ? 'login-error' : undefined}
           onChange={event => setPassword(event.target.value)} />
         {error && <p id="login-error" className="login-error" role="alert">{error}</p>}
         <button className="login-submit" type="submit" disabled={submitting}>{submitting ? '로그인 중…' : '로그인'}</button>
@@ -70,6 +70,7 @@ export default function LoginPage() {
         <a href={oauthStartUrl('google')} aria-label="구글로 로그인" title="구글로 로그인"><img className="google-brand" src={googleIcon} alt=""/></a>
         <a href={oauthStartUrl('kakao')} className="kakao-login" aria-label="카카오로 로그인" title="카카오로 로그인"><span className="kakao-symbol"><img src={kakaoIcon} alt=""/></span></a>
       </div>
+      <button className="admin-login secondary-button" type="button" onClick={()=>setError('관리자 로그인은 준비 중이에요.')}>관리자 전용 로그인</button>
       <p className="login-footnote">야구를 알아가는 첫걸음, LOOKIE와 함께해요.</p>
     </section>
   </main>

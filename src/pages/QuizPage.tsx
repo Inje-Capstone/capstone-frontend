@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getErrorMessage } from '../api/apiClient'
 import { quizService } from '../services/quizService'
 import type { QuizFeedback } from '../services/quizService'
 import type { QuizQuestion } from '../types/quiz'
+import { useResource } from '../hooks/useResource'
+import ResourceState from '../components/ResourceState'
 
 export default function QuizPage() {
  const [questions, setQuestions] = useState<QuizQuestion[]>([])
@@ -13,6 +15,12 @@ export default function QuizPage() {
  const [busy, setBusy] = useState(false)
  const [error, setError] = useState('')
  const lock = useRef(false)
+ const [historyFilter, setHistoryFilter] = useState<'all' | 'correct' | 'incorrect'>('all')
+ const [historyLimit, setHistoryLimit] = useState(20)
+ const history = useResource(useCallback((signal: AbortSignal) => quizService.attempts({
+  limit: historyLimit, correct: historyFilter === 'all' ? undefined : historyFilter === 'correct',
+ }, signal), [historyLimit, historyFilter]))
+ const summary = useResource(useCallback((signal: AbortSignal) => quizService.summary(signal), []))
 
  const item = questions[index]
  const result = item ? answers[item.id] : undefined
@@ -50,6 +58,8 @@ export default function QuizPage() {
   try {
    const feedback = await quizService.submit(item.id, choice)
    setAnswers(previous => ({ ...previous, [item.id]: feedback }))
+   history.retry()
+   summary.retry()
   } catch (e) {
    setError(getErrorMessage(e))
   } finally {
@@ -66,12 +76,9 @@ export default function QuizPage() {
 
  return (
      <main className="page quiz-layout">
-      <aside className="quiz-history">
-       <h2>풀이 기록</h2>
-       <p className="muted small">풀이 기록 조회는 준비 중이에요.</p>
-      </aside>
 
-      <section className="quiz-question" aria-live="polite" aria-busy={busy}>
+
+      <section className="quiz-question" aria-label="퀴즈" aria-live="polite" aria-busy={busy}>
        {!questions.length ? (
            <div className="quiz-intro">
             <p className="eyebrow">야구 규칙을 복습해요</p>
@@ -129,13 +136,48 @@ export default function QuizPage() {
             </strong>
             <div className="row">
              <button className="secondary-button" onClick={() => moveTo(0)}>답안 다시 보기</button>
-             <Link to="/">홈으로</Link>
+             <Link className="button secondary-button" to="/">홈으로</Link>
             </div>
            </div>
        )}
 
        {error && <p role="alert" className="login-error">{error}</p>}
       </section>
+      <aside className="quiz-history" aria-label="풀이 기록">
+       <h2>풀이 기록</h2>
+       <section className="quiz-attempt-summary" aria-label="전체 풀이 통계" aria-busy={summary.loading}>
+        <ResourceState {...summary}/>
+        {summary.data && <dl>{[['전체', summary.data.totalCount], ['정답', summary.data.correctCount], ['오답', summary.data.incorrectCount]].map(([label, count]) =>
+         <div key={label}><dt>{label}</dt><dd>{Number(count).toLocaleString()}<span>회</span></dd></div>)}</dl>}
+       </section>
+       <div className="quiz-history-filters" role="group" aria-label="풀이 결과 필터">
+        {([['all','전체'],['correct','정답'],['incorrect','오답']] as const).map(([value,label]) =>
+         <button key={value} className={'chip '+(historyFilter===value?'active':'')} aria-pressed={historyFilter===value} onClick={()=>setHistoryFilter(value)}>{label}</button>)}
+       </div>
+       <label className="quiz-history-limit">최근 기록
+        <select aria-label="풀이 기록 조회 개수" value={historyLimit} onChange={e=>setHistoryLimit(Number(e.target.value))}>
+         {[5,10,20].map(limit=><option key={limit} value={limit}>{limit}개</option>)}
+        </select>
+       </label>
+       <div className="quiz-attempt-list" aria-live="polite" aria-busy={history.loading}>
+        <ResourceState {...history}/>
+        {history.data?.length===0 && <p className="muted small">{historyFilter==='all'?'아직 풀이 기록이 없어요.':historyFilter==='correct'?'정답 기록이 없어요.':'오답 기록이 없어요.'}</p>}
+        {history.data?.map((attempt,i)=>{
+         const question=questions.find(q=>q.id===String(attempt.questionId))
+         const option=question?.choices.find(c=>c.id===String(attempt.selectedOptionId))
+         // Server LocalDateTime has no zone. Preserve its wall time without guessing a timezone.
+         const time=attempt.submittedAt.replace('T',' ').slice(0,19)
+         return <article className="quiz-attempt" key={i}>
+          <div className="between"><strong>문항 {attempt.questionId}</strong><span className={'attempt-result '+(attempt.correct?'correct':'incorrect')}>{attempt.correct?'정답':'오답'}</span></div>
+          {question && <p className="attempt-question">{question.text}</p>}
+          <p className="small">선택 {attempt.selectedOptionId}{option?' · '+option.label:''}</p>
+          <time dateTime={attempt.submittedAt}>{time}</time>
+         </article>
+        })}
+       </div>
+       <p className="muted small quiz-history-note">최근 {historyLimit}개 · 최신순<br/>시각은 서버 기록 기준입니다.</p>
+       <button className="secondary-button small-button" disabled={history.loading||summary.loading} onClick={()=>{history.retry();summary.retry()}}>기록 새로고침</button>
+      </aside>
      </main>
  )
 }
