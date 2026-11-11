@@ -1,3 +1,4 @@
+// Static glossary content belongs to the removable demo implementation.
 export interface GlossarySeed { name:string; category:string; easy:string; standard:string; deep:string; aliases?:string[]; related?:string[] }
 export const glossarySeed: Record<string,GlossarySeed> = {
   "balk": {

@@ -8,8 +8,8 @@ export default function DictionaryPage() {
  const location=useLocation(),[params,setParams]=useSearchParams()
  const [query,setQuery]=useState(''),[category,setCategory]=useState('전체'),[ascending,setAscending]=useState(true)
  const terms=useResource(useCallback((signal:AbortSignal)=>listTerms(signal),[]))
- const selected=params.get('term')||'balk'
- const detail=useResource(useCallback((signal:AbortSignal)=>getTerm(selected,'BEGINNER',signal),[selected]))
+ const selected=params.get('term')||terms.data?.[0]?.id||''
+ const detail=useResource(useCallback((signal:AbortSignal)=>selected?getTerm(selected,'BEGINNER',signal):Promise.resolve(null),[selected]))
  const filters=['전체','기본 룰','구종 · 투구','전술 · 기록','응원 문화']
  const filtered=terms.data?.filter(t=>(category==='전체'||t.category_label===category)&&[t.name,...t.aliases].some(n=>n.toLowerCase().includes(query.trim().toLowerCase()))).sort((a,b)=>(ascending?1:-1)*a.name.localeCompare(b.name,'ko'))
  const fromWatch=typeof location.state?.watch==='string'?location.state.watch:null
