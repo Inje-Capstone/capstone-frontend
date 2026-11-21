@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import { getErrorMessage } from '../api/apiClient'
-export function useResource<T>(load:(signal:AbortSignal)=>Promise<T>) {
+export interface ResourceResult<T> {
+ data: T | null
+ error: string
+ loading: boolean
+ retry: () => void
+}
+
+export function useResource<T>(load:(signal:AbortSignal)=>Promise<T>): ResourceResult<T> {
  const [result,setResult] = useState<{data:T|null;error:string;loading:boolean}>({data:null,error:'',loading:true})
  const [version,setVersion] = useState(0)
  useEffect(()=>{

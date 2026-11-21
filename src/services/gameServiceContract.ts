@@ -2,7 +2,7 @@ import type { LearningLevel } from '../types/backend'
 import type { Game, CardsOut, Card, Moment, Matchup, GameState, Term, TermSummary, ChatOut } from '../types/mvp'
 
 // Frontend playback metadata, derived locally; these are not backend DTO fields.
-export type PlaybackSource = { kind: 'recording'; url: string } | { kind: 'demo' }
+export type PlaybackSource = { url: string }
 export interface PlayableGame extends Game { playback: PlaybackSource | null }
 
 export interface GameService {

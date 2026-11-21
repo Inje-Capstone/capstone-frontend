@@ -1,4 +1,4 @@
-export default function Character({jersey='LG-home',bat=true,ball=true}:{jersey?:string;bat?:boolean;ball?:boolean}) {
+export default function Character({jersey='',bat=false,ball=false}:{jersey?:string;bat?:boolean;ball?:boolean}) {
  const away=jersey.endsWith('away')
  return <div className={'character-scene '+(away?'away':'')} role="img" aria-label="등번호 7번 루키 캐릭터">
   <div className="rookie"><div className="rk-cap"/><div className="rk-brim"/>

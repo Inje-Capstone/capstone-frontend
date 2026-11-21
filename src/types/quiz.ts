@@ -2,6 +2,7 @@
 export interface DateRange { start: string; end: string }
 // Confirmed backend DTOs; attemptId is not part of the deployed contract yet.
 export interface QuizAttempt {
+ attemptId?: number
  questionId: number
  selectedOptionId: number
  correct: boolean

@@ -12,7 +12,7 @@ function readProgress(key:string):Progress {
   const value=JSON.parse(localStorage.getItem(key)||'null') as Progress|null
   if(value&&Number.isFinite(value.points)&&value.points>=0&&Array.isArray(value.inventory)&&value.playback) {
    const clean={...newProgress(),...value}
-   // Discard the retired local mock-quiz cache without touching playback/settings.
+   // Discard the retired quiz cache without touching playback/settings.
    delete (clean as Progress & {quizzes?:unknown}).quizzes
    return clean
   }
