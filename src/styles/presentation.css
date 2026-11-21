@@ -1,5 +1,5 @@
 /* Adjust --seam-inset to move both seams toward/away from the center. */
-.splash-welcome{--seam-inset:18vw}
+.splash-welcome{--seam-inset:var(--splash-seam-inset)}
 .splash-welcome .splash-seam.left{left:var(--seam-inset)}
 .splash-welcome .splash-seam.right{right:var(--seam-inset)}
 .seams-playing .seam-stitch{animation-play-state:running}
@@ -7,7 +7,6 @@
 .connection-screen h1{font-size:1.5rem;margin:0}.connection-screen p{color:#777;line-height:1.7}
 .connection-screen .offline-baseball{width:6rem;height:6rem;animation:offline-clockwise 5s linear infinite;transform-box:view-box;transform-origin:50% 50%}
 .playback-status{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.5rem 0}
-.preview-play{display:inline-flex;align-items:center;justify-content:center}
 .dictionary-sort{display:flex;justify-content:flex-end;margin:.75rem 0}
 .form-tooltip{position:fixed;z-index:1000;display:flex;align-items:center;gap:.5rem;width:max-content;max-width:min(20rem,calc(100vw - 24px));padding:.75rem 1rem;border:1px solid #e8c1bd;border-radius:.5rem;background:#fff9f8;box-shadow:0 4px 14px #0001;font-family:inherit;font-size:.875rem;line-height:1.5;color:#71443e;pointer-events:none}
 .hint-warning{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:1.2em;height:1.2em;border-radius:50%;background:#bd343a;color:#fff;font-weight:800}
@@ -21,15 +20,13 @@
 .login-links a,.center-link{display:inline-flex;align-items:center;justify-content:center;min-height:2.25rem;padding:.45rem .7rem;border:1px solid #d5d5d5;border-radius:.375rem;background:#fff;line-height:1.35;text-decoration:none}
 .center-link{display:flex;width:max-content;max-width:100%}
 .admin-login{width:100%;margin-top:.25rem;font-size:.8125rem}
-.preview-play{width:3.5rem;height:3.5rem;padding:0}
-.preview-play svg{display:block;width:1.75rem;height:1.75rem;flex:none}
 .chat-history .messages{min-height:9rem;max-height:18rem;overflow-y:auto;padding-block:.75rem}
 .card-actions{margin-block:1rem}
 .explanation-card .card-cta{margin-top:.75rem}
 .explanation-reasons>summary,.card-history>summary,.analysis-panel>summary{padding:.6rem .75rem;border:1px solid #ccc;border-radius:.375rem;background:#fafafa;color:#444;cursor:pointer;line-height:1.4}
 .card-history .chips{margin-top:.75rem}
 .dictionary-sort .chip{gap:.5rem}
-.quiz-layout{grid-template-columns:minmax(0,8fr) minmax(0,2fr);gap:1.5rem;align-items:start}
+.quiz-layout{grid-template-columns:var(--layout-quiz-columns);gap:1.5rem;align-items:start}
 .quiz-question{width:100%;padding:clamp(1rem,2.5vw,2.5rem);border:1px solid var(--border);border-radius:.75rem;min-height:26rem}
 .quiz-question .answer-options{max-width:44rem}
 .quiz-question>h1{max-width:50rem}

@@ -16,15 +16,17 @@ export type QuizFeedback = Pick<QuizResult, 'choiceId' | 'correct'>
 
 export const quizService = {
  async attempts(query: QuizAttemptQuery = {}, signal?: AbortSignal): Promise<QuizAttempt[]> {
-  const limit = query.limit ?? 20
-  if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error('풀이 기록은 1~20개까지 조회할 수 있어요.')
-  const params = new URLSearchParams({ limit: String(limit) })
+  const limit = query.limit ?? 10
+  if (!Number.isInteger(limit) || limit < 1 || limit > 10) throw new Error('풀이 기록은 1~10개까지 조회할 수 있어요.')
+  const params = new URLSearchParams()
   if (query.correct !== undefined) params.set('correct', String(query.correct))
-  const attempts = requireResponseData(await apiRequest<QuizAttempt[]>(`/api/quizzes/attempts?${params}`, { signal }))
+  const queryString = params.toString()
+  const suffix = queryString ? `?${queryString}` : ''
+  const attempts = requireResponseData(await apiRequest<QuizAttempt[]>(`/api/quizzes/attempts${suffix}`, { signal }))
   if (!Array.isArray(attempts) || attempts.some(item => !item || !Number.isInteger(item.questionId) || !Number.isInteger(item.selectedOptionId) || typeof item.correct !== 'boolean' || typeof item.submittedAt !== 'string')) {
    throw new Error('풀이 기록 응답을 확인하지 못했어요.')
   }
-  return attempts
+  return attempts.slice(0, limit)
  },
 
  async summary(signal?: AbortSignal): Promise<QuizAttemptSummary> {

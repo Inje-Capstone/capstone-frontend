@@ -1,0 +1,27 @@
+:root {
+  /* Theme */
+  --color-text: #333;
+  --color-text-strong: #111;
+  --color-muted: #888;
+  --color-border: #d5d5d5;
+  --color-blue: #4a7bc8;
+  --color-surface-soft: #f7f7f4;
+
+  /* Shared layout values: adjust these first when tuning proportions. */
+  --layout-content-padding: clamp(1.25rem, 2.7vw, 5rem);
+  --layout-watch-columns: 1.97fr 1fr;
+  --layout-quiz-columns: 8fr 2fr;
+  --layout-dictionary-columns: 560fr 550fr;
+  --layout-video-aspect-ratio: 16 / 9;
+  --layout-content-padding-tablet: 1.25rem;
+  --layout-content-padding-mobile: 1rem;
+  --layout-watch-columns-tablet: 1.5fr 1fr;
+  /* Frequently adjusted spacing */
+  --space-page: 1.75rem;
+  --space-page-tablet: 1.5rem;
+  --space-section: 1.5rem;
+  --space-card: 1.125rem;
+
+  /* Motion settings */
+  --splash-seam-inset: 18vw;
+}
