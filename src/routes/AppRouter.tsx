@@ -7,6 +7,7 @@ import SignupPage from '../pages/SignupPage'
 import PasswordResetPage from '../pages/PasswordResetPage'
 import OnboardingPage from '../pages/OnboardingPage'
 import WatchPage from '../pages/WatchPage'
+import WatchEntryPage from '../pages/WatchEntryPage'
 import DictionaryPage from '../pages/DictionaryPage'
 import QuizPage from '../pages/QuizPage'
 import KboPage from '../pages/KboPage'
@@ -27,6 +28,7 @@ export default function AppRouter() {
   <Route element={<RequireAuth allowIncomplete/>}><Route path="/onboarding" element={<OnboardingPage/>}/></Route>
   <Route element={<RequireAuth/>}><Route element={<AppLayout/>}>
    <Route path="/" element={<HomePage/>}/>
+   <Route path="/watch" element={<WatchEntryPage/>}/>
    <Route path="/watch/:gameId" element={<WatchPage/>}/>
    <Route path="/dictionary" element={<DictionaryPage/>}/>
    <Route path="/quiz" element={<QuizPage/>}/>
