@@ -5,12 +5,10 @@ import ResourceState from '../components/ResourceState'
 import RookieMascot from '../components/RookieMascot'
 import TeamIdentity from '../components/TeamIdentity'
 import { teamForGameName } from '../data/kbo'
+import { isFavoriteReplay, orderReplays, watchGamePath } from '../data/replayGames'
 import { useResource } from '../hooks/useResource'
 import { listGames } from '../services/gameService'
-import type { PlayableGame } from '../services/gameServiceContract'
 import { useProgress } from '../state/ProgressContext'
-
-const watchUrl = (game: PlayableGame) => '/watch/' + encodeURIComponent(game.id)
 
 export default function HomePage() {
   const { state } = useAuth()
@@ -19,11 +17,7 @@ export default function HomePage() {
   const games = useResource(useCallback((signal: AbortSignal) => listGames(signal), []))
   const [expanded, setExpanded] = useState(false)
   const team = state.status === 'authenticated' ? state.onboarding.supportedTeam : null
-  const isFavorite = (game: PlayableGame) => Boolean(team && (
-    teamForGameName(game.home_team)?.code === team || teamForGameName(game.away_team)?.code === team
-  ))
-  const ordered = [...(games.data ?? [])].sort((a, b) =>
-    Number(isFavorite(b)) - Number(isFavorite(a)) || b.date.localeCompare(a.date))
+  const ordered = orderReplays(games.data ?? [], team)
   const featured = ordered.find(game => game.playback)
   const visible = ordered.slice(0, expanded ? undefined : 6)
 
@@ -38,11 +32,11 @@ export default function HomePage() {
     </header>
     <div className="rookie-home-grid">
       <section className="rookie-feature">
-        <p className="rookie-kicker">{featured && isFavorite(featured) ? '응원팀 추천 경기' : '경기 리플레이'}</p>
+        <p className="rookie-kicker">{featured && isFavoriteReplay(featured, team) ? '응원팀 추천 경기' : '경기 리플레이'}</p>
         <h2>좋아하는 팀과<br />첫 번째 플레이!</h2>
         <p>{featured ? <>{featured.home_team} vs {featured.away_team} · {featured.date} · {featured.stadium}</>
           : '경기 장면을 보면서 야구를 하나씩 알아가요.'}</p>
-        {featured ? <Link className="button" to={watchUrl(featured)}>
+        {featured ? <Link className="button" to={watchGamePath(featured)}>
           {progress.playback[featured.id] > 0 ? '이어보기' : '경기 보러 가기'} ↗
         </Link> : <a className="button" href="#replays">경기 목록 보기 ↓</a>}
         {featured?.score_text && <p className="rookie-feature-score">{featured.score_text}</p>}
@@ -51,7 +45,7 @@ export default function HomePage() {
         <h2>잘 몰라도,<br />같이 보면 재밌지!</h2>
         <p>야구가 궁금한 순간,<br />내가 옆에서 알려줄게.</p>
         <RookieMascot className="rookie-coach-mascot" />
-        <Link className="button secondary-button" to={featured ? watchUrl(featured) + '#rookie-chat' : '/dictionary'}>
+        <Link className="button secondary-button" to={featured ? watchGamePath(featured) + '#rookie-chat' : '/dictionary'}>
           {featured ? '루키와 이야기하기' : '용어 사전 보기'} ↗
         </Link>
       </aside>
@@ -70,8 +64,8 @@ export default function HomePage() {
           <TeamIdentity team={teamForGameName(game.away_team)?.code ?? null} name={game.away_team} />
         </div>
         <p>{game.score_text ?? <>{game.home_team} vs {game.away_team}</>}</p>
-        <small>{game.date} · {game.stadium}{isFavorite(game) ? ' · 응원팀' : ''}</small>
-        {game.playback ? <Link to={watchUrl(game)} className="button secondary-button small-button"
+        <small>{game.date} · {game.stadium}{isFavoriteReplay(game, team) ? ' · 응원팀' : ''}</small>
+        {game.playback ? <Link to={watchGamePath(game)} className="button secondary-button small-button"
           aria-label={game.home_team + ' 대 ' + game.away_team + ' 경기 보기'}>경기 보기 ↗</Link>
           : <small className="muted">영상 미확보</small>}
       </li>)}</ul>

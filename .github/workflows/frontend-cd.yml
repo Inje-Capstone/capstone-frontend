@@ -61,8 +61,13 @@ jobs:
       - name: Build frontend
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_REPLAY_GAME_ID: ${{ vars.VITE_REPLAY_GAME_ID }}
+          VITE_REPLAY_VIDEO_URL: ${{ vars.VITE_REPLAY_VIDEO_URL }}
         run: |
           : "${VITE_API_BASE_URL:?VITE_API_BASE_URL must be set}"
+          if [ -z "$VITE_REPLAY_GAME_ID" ] || [ -z "$VITE_REPLAY_VIDEO_URL" ]; then
+            echo "::warning::Set both VITE_REPLAY_GAME_ID and VITE_REPLAY_VIDEO_URL to enable recorded game playback."
+          fi
           npm run build
           test -s dist/index.html
 

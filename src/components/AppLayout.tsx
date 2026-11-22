@@ -10,14 +10,13 @@ function Layout() {
  const {state}=useAuth()
  const location=useLocation()
  useEffect(()=>{clearReconnect()},[location.pathname,location.search])
- const watching=location.pathname.startsWith('/watch/')
  return <div className="rookie-app">
   {storageWarning&&<p className="storage-warning" role="status">브라우저 저장 공간을 사용할 수 없어 새로고침하면 기록이 사라질 수 있어요.</p>}
   <a href="#main-content" className="skip-link">본문으로 이동</a>
   <header className="app-nav"><Link to="/" className="wordmark">L<span>OO</span>KIE</Link>
    <nav aria-label="주요 메뉴">
     <Link to="/" className={location.pathname==='/'&&location.hash!=='#replays'?'active':''}>홈</Link>
-    <Link to="/#replays" className={watching||location.hash==='#replays'?'active':''}>경기 시청</Link>
+    <NavLink to="/watch">경기 시청</NavLink>
     {[['/dictionary','용어 사전'],['/quiz','퀴즈'],['/kbo','KBO 정보'],['/shop','상점']].map(([to,label])=>
       <NavLink key={to} to={to}>{label}</NavLink>)}
    </nav>
