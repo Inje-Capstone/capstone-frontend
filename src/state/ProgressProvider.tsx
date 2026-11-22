@@ -42,6 +42,7 @@ export default function ProgressProvider({children,accountKey}:{children:ReactNo
   }),
   setReview:reviewEnabled=>setProgress(p=>({...p,reviewEnabled})),
   setCategories:categories=>setProgress(p=>({...p,categories})),
+  setProfilePhoto:profilePhoto=>setProgress(p=>({...p,profilePhoto})),
   applyConfirmedBalance:balance=>{if(Number.isFinite(balance)&&balance>=0)setProgress(p=>({...p,points:balance,pointsBalanceConfirmed:true}))},
   clearLocalData:()=>{cleared.current=true;try{localStorage.removeItem(storageKey)}catch{/* Session still ends if storage is unavailable. */}},
  }),[storageKey])

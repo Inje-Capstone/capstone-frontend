@@ -1,5 +1,5 @@
 import { apiRequest, requireResponseData } from '../api/apiClient'
-import type { QuizQuestion, QuizResult, QuizAttempt, QuizAttemptSummary, QuizAttemptQuery } from '../types/quiz'
+import type { QuizQuestion, QuizResult, QuizAttempt, QuizAttemptDetail, QuizAttemptSummary, QuizAttemptQuery } from '../types/quiz'
 
 interface QuizQuestionDto {
  questionId: number
@@ -10,9 +10,14 @@ interface QuizQuestionDto {
 interface QuizAnswerDto {
  questionId: number
  correct: boolean
+ correctOptionId?: number
+ explanation?: string | null
 }
 
-export type QuizFeedback = Pick<QuizResult, 'choiceId' | 'correct'>
+export type QuizFeedback = Pick<QuizResult, 'choiceId' | 'correct'> & {
+ correctOptionId?: number
+ explanation?: string | null
+}
 
 export const quizService = {
  async attempts(query: QuizAttemptQuery = {}, signal?: AbortSignal): Promise<QuizAttempt[]> {
@@ -27,6 +32,10 @@ export const quizService = {
    throw new Error('풀이 기록 응답을 확인하지 못했어요.')
   }
   return attempts.slice(0, limit)
+ },
+
+ async attempt(attemptId: number, signal?: AbortSignal): Promise<QuizAttemptDetail> {
+  return requireResponseData(await apiRequest<QuizAttemptDetail>('/api/quizzes/attempts/' + attemptId, { signal }))
  },
 
  async summary(signal?: AbortSignal): Promise<QuizAttemptSummary> {
@@ -68,6 +77,6 @@ export const quizService = {
    throw new Error('채점 응답을 확인하지 못했어요.')
   }
 
-  return { choiceId, correct: answer.correct }
+  return { choiceId, correct: answer.correct, correctOptionId: answer.correctOptionId, explanation: answer.explanation }
  },
 }

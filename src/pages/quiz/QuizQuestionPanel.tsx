@@ -41,7 +41,11 @@ export function QuizQuestionPanel({ questions, item, result, selected, correctCo
           </div>
           {result ? (
             <section className="quiz-feedback">
-              <strong>{result.correct ? '정답이에요!' : '오답이에요.'}</strong>
+              <div>
+                <strong>{result.correct ? '정답이에요!' : '오답이에요.'}</strong>
+                {result.correctOptionId !== undefined && <p>정답 · {item.choices.find(option => option.id === String(result.correctOptionId))?.label ?? result.correctOptionId}</p>}
+                {result.explanation && <p>{result.explanation}</p>}
+              </div>
               <button onClick={() => onMove(index + 1)}>{index === questions.length - 1 ? '결과 보기' : '다음 문제'}</button>
             </section>
           ) : (

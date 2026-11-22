@@ -5,6 +5,7 @@ export interface ProgressValue {
  savePlayback:(game:string,t:number)=>void; markSeen:(terms:string[])=>void
  addWatchSeconds:(seconds:number)=>void; setReview:(enabled:boolean)=>void; setCategories:(categories:string[])=>void
  applyConfirmedBalance:(balance:number)=>void; clearLocalData:()=>void
+ setProfilePhoto:(photo:string|undefined)=>void
 }
 export const ProgressContext=createContext<ProgressValue|null>(null)
 export function useProgress() {
