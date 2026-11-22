@@ -9,11 +9,11 @@ import { useQuizSession } from './quiz/useQuizSession'
 
 export default function QuizPage() {
   const [historyFilter, setHistoryFilter] = useState<'all' | 'correct' | 'incorrect'>('all')
-  const [historyLimit, setHistoryLimit] = useState(10)
+  const [historyExpanded, setHistoryExpanded] = useState(false)
   const history = useResource<QuizAttempt[]>(useCallback(signal => quizService.attempts({
-    limit: historyLimit,
+    limit: 10,
     correct: historyFilter === 'all' ? undefined : historyFilter === 'correct',
-  }, signal), [historyLimit, historyFilter]))
+  }, signal), [historyFilter]))
   const summary = useResource<QuizAttemptSummary>(useCallback(signal => quizService.summary(signal), []))
   const session = useQuizSession(() => {
     history.retry()
@@ -21,7 +21,7 @@ export default function QuizPage() {
   })
 
   return (
-    <main className="page quiz-layout">
+    <main className={'page quiz-layout' + (historyExpanded ? ' history-expanded' : '')}>
       <QuizQuestionPanel
         questions={session.questions}
         item={session.item}
@@ -39,11 +39,10 @@ export default function QuizPage() {
       <QuizHistoryPanel
         attempts={history}
         summary={summary}
-        questions={session.questions}
         filter={historyFilter}
-        limit={historyLimit}
+        expanded={historyExpanded}
         onFilterChange={setHistoryFilter}
-        onLimitChange={setHistoryLimit}
+        onToggleWidth={() => setHistoryExpanded(value => !value)}
         onRefresh={() => { history.retry(); summary.retry() }}
       />
     </main>

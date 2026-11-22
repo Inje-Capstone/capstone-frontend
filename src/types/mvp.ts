@@ -30,6 +30,7 @@ export interface ChatOut { answer: string; ok: boolean; source: string; context:
 export interface TermSummary { id: string; name: string; category: string; category_label: string; aliases: string[]; summary: string }
 export interface Term extends TermSummary { level: number; body: string; levels: Record<string,string>; related: TermSummary[] }
 export interface Progress {
+  profilePhoto?: string
   points: number; pointsBalanceConfirmed: boolean; inventory: string[]; equipped: Record<string,string>
   seenTerms: string[]; seenTermsByDay: Record<string,string[]>
   playback: Record<string,number>; reviewEnabled: boolean; categories: string[]

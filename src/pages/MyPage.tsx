@@ -6,19 +6,30 @@ import { getProfile,getTeams,getLevels,updateProfile } from '../api/userApi'
 import { getErrorMessage } from '../api/apiClient'
 import { useResource } from '../hooks/useResource'
 import { categories,levels,teams } from '../data/choices'
+import { prepareProfilePhoto } from '../data/profilePhoto'
 import ResourceState from '../components/ResourceState'
 import Modal from '../components/Modal'
 import ProfileAvatar from '../components/ProfileAvatar'
 import TeamIdentity from '../components/TeamIdentity'
 import type { LearningLevel,SupportedTeam } from '../types/backend'
-type Panel='nickname'|'level'|'team'|'categories'|'settings'|'password'|'delete'|'logout'|''
+type Panel='photo'|'nickname'|'level'|'team'|'categories'|'settings'|'password'|'delete'|'logout'|''
 export default function MyPage() {
- const {signOutToSplash,refreshSession}=useAuth(),{progress,setCategories,setReview,clearLocalData}=useProgress()
+ const {signOutToSplash,refreshSession}=useAuth(),{progress,setCategories,setReview,setProfilePhoto,clearLocalData}=useProgress()
  const profile=useResource(useCallback(()=>getProfile(),[]))
  const teamOptions=useResource(useCallback(()=>getTeams(),[])),levelOptions=useResource(useCallback(()=>getLevels(),[]))
  const [panel,setPanel]=useState<Panel>(''),[value,setValue]=useState(''),[interest,setInterest]=useState(progress.categories)
  const [error,setError]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState('')
+ const [photoPreview,setPhotoPreview]=useState('')
  function open(next:Panel,initial='') {setPanel(next);setValue(initial);setError('')}
+ async function previewPhoto(file: File | undefined) {
+  if (!file || busy) return
+  setBusy(true)
+  setError('')
+  setPhotoPreview('')
+  try { setPhotoPreview(await prepareProfilePhoto(file)) }
+  catch (error) { setError(getErrorMessage(error)) }
+  finally { setBusy(false) }
+ }
  async function save(field:'nickname'|'supported-team'|'learning-level'|'game-notification',next:unknown,refresh=true) {
   if(busy)return;setBusy(true);setError('')
   try{await updateProfile(field,next);if(field!=='game-notification')setPanel('');profile.retry();if(refresh)await refreshSession();setNotice('변경 내용을 저장했어요.')}
@@ -31,7 +42,13 @@ export default function MyPage() {
  }
  const user=profile.data
  return <main className="page profile-page"><div className="profile-content"><ResourceState {...profile}/>
- {user&&<><header className="profile-heading"><ProfileAvatar team={user.supportedTeam} large/><div><button className="text-button nickname-button" onClick={()=>open('nickname',user.nickname)}>{user.nickname} <small>수정</small></button><p className="muted small">{user.email||'이메일 미제공'}</p></div></header>
+ {user&&<><header className="profile-heading">
+   <ProfileAvatar team={user.supportedTeam} large image={progress.profilePhoto ? {src: progress.profilePhoto, alt: '프로필 사진'} : null}/>
+   <div><button className="text-button nickname-button" onClick={()=>open('nickname',user.nickname)}>{user.nickname} <small>수정</small></button>
+    <p className="muted small">{user.email||'이메일 미제공'}</p>
+    <button className="secondary-button small-button" onClick={()=>{setPhotoPreview('');open('photo')}}>프로필 사진 변경</button>
+   </div>
+ </header>
  <div className="profile-rows">
   <button className="profile-row" onClick={()=>open('level',user.learningLevel||'INTRODUCTORY')}><span>야구 지식 수준</span><span>{user.learningLevelDisplayName||levels.find(l=>l.code===user.learningLevel)?.displayName||'미설정'} <b>변경 ›</b></span></button>
   <button className="profile-row" onClick={()=>{setInterest(progress.categories);open('categories')}}><span>관심 카테고리</span><span>{progress.categories.join(', ')||'전체'} <b>변경 ›</b></span></button>
@@ -42,7 +59,23 @@ export default function MyPage() {
  {notice&&<p role="status" className="inline-notice">{notice}</p>}
  </>}
  </div>
- {panel&&<Modal className={panel==='settings'?'settings-modal':panel==='delete'?'withdrawal-modal':''} title={{nickname:'닉네임 변경',level:'야구 지식 수준',team:'응원팀 선택',categories:'관심 카테고리',settings:'설정',password:'비밀번호 변경',delete:'정말 탈퇴하시겠어요?',logout:'로그아웃'}[panel]} onClose={()=>{if(!busy)setPanel('')}}>
+ {panel&&<Modal className={panel==='settings'?'settings-modal':panel==='delete'?'withdrawal-modal':''} title={{photo:'프로필 사진 변경',nickname:'닉네임 변경',level:'야구 지식 수준',team:'응원팀 선택',categories:'관심 카테고리',settings:'설정',password:'비밀번호 변경',delete:'정말 탈퇴하시겠어요?',logout:'로그아웃'}[panel]} onClose={()=>{if(!busy)setPanel('')}}>
+ {panel==='photo'&&<div className="rookie-profile-editor">
+  <label htmlFor="profile-photo">사진 선택</label>
+  <input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp" disabled={busy}
+    onChange={event=>void previewPhoto(event.target.files?.[0])}/>
+  <div className="rookie-photo-preview">
+   <ProfileAvatar team={user?.supportedTeam ?? null} large image={photoPreview ? {src: photoPreview, alt: '큰 프로필 사진 미리보기'} : null}/>
+   <ProfileAvatar team={user?.supportedTeam ?? null} image={photoPreview ? {src: photoPreview, alt: '작은 프로필 사진 미리보기'} : null}/>
+  </div>
+  <p className="small muted">사진은 이 브라우저에 저장돼요.</p>
+  <div className="row">
+   <button type="button" disabled={busy || !photoPreview} onClick={()=>{setProfilePhoto(photoPreview);setPanel('');setNotice('프로필 사진을 저장했어요.')}}>사진 적용</button>
+   {progress.profilePhoto && <button type="button" className="secondary-button" disabled={busy}
+     onClick={()=>{setProfilePhoto(undefined);setPanel('');setNotice('기본 프로필로 변경했어요.')}}>기본 프로필 사용</button>}
+   <button type="button" className="secondary-button" disabled={busy} onClick={()=>setPanel('')}>취소</button>
+  </div>
+ </div>}
  {panel==='nickname'&&<form onSubmit={e=>{e.preventDefault();if(value.trim().length<2){setError('닉네임은 2~20자로 입력해주세요.');return}void save('nickname',value.trim(),false)}}><label>닉네임<input required minLength={2} maxLength={20} value={value} onChange={e=>setValue(e.target.value)}/></label><button disabled={busy}>저장</button></form>}
  {panel==='level'&&<><ResourceState {...levelOptions}/><div className="answer-options">{levelOptions.data?.map(l=><button key={l.code} className={'option '+(value===l.code?'selected':'')} onClick={()=>setValue(l.code)}>{l.displayName}</button>)}</div><button disabled={busy} onClick={()=>void save('learning-level',value as LearningLevel)}>저장</button></>}
  {panel==='team'&&<><ResourceState {...teamOptions}/><div className="team-grid">{teamOptions.data?.filter(t=>t.code&&t.code!=='NONE').map(t=><button key={t.code} className={'team-option '+(value===t.code?'selected':'')} aria-pressed={value===t.code} disabled={busy} onClick={()=>setValue(t.code||'NONE')}><TeamIdentity team={t.code} name={t.displayName}/></button>)}</div>{teamOptions.data?.some(t=>t.code==='NONE')&&<button className={'option '+(value==='NONE'?'selected':'')} aria-pressed={value==='NONE'} disabled={busy} onClick={()=>setValue('NONE')}>아직 없어요</button>}<button disabled={busy||!value} onClick={()=>void save('supported-team',value as SupportedTeam)}>저장</button></>}

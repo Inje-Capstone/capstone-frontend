@@ -1,6 +1,5 @@
 // Frontend view models, NOT an agreed backend wire format. Map confirmed DTOs in an adapter.
 export interface DateRange { start: string; end: string }
-// Confirmed backend DTOs; attemptId is not part of the deployed contract yet.
 export interface QuizAttempt {
  attemptId?: number
  questionId: number
@@ -8,10 +7,17 @@ export interface QuizAttempt {
  correct: boolean
  submittedAt: string
 }
+export interface QuizAttemptDetail extends QuizAttempt {
+ questionText: string
+ options: { optionId: number; text: string }[]
+ correctOptionId: number
+ explanation: string | null
+}
 export interface QuizAttemptSummary {
  totalCount: number
  correctCount: number
  incorrectCount: number
+ accuracyRate?: number
 }
 export interface QuizAttemptQuery { correct?: boolean; limit?: number }
 export interface QuizResult { choiceId: string; correctChoiceId: string; correct: boolean; explanation: string; awardedPoints: number }

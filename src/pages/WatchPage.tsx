@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getErrorMessage } from '../api/apiClient'
 import * as gameService from '../services/gameService'
@@ -21,6 +21,7 @@ export default function WatchPage() {
   const { state: auth } = useAuth()
   const { progress, savePlayback, markSeen, addWatchSeconds, setReview } = useProgress()
   const navigate = useNavigate()
+  const { hash } = useLocation()
 
   const [time, setTime] = useState(() => reconnectTime(gameId) ?? progress.playback[gameId] ?? 0)
   const [playing, setPlaying] = useState(false)
@@ -45,6 +46,12 @@ export default function WatchPage() {
   const game = games.data?.find(item => item.id === gameId)
   const source = game?.playback?.url || ''
   const detectedForGame = detectedCards[gameId] || []
+
+  useEffect(() => {
+    if (source && hash === '#rookie-chat') {
+      document.getElementById('rookie-chat')?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [source, hash])
 
   useEffect(() => {
     if (game?.video_duration_sec) queueMicrotask(() => setDuration(game.video_duration_sec))
@@ -138,7 +145,11 @@ export default function WatchPage() {
     <Link className="button" to="/">경기 목록으로</Link>
   </main>
 
-  return <main className="watch-page">
+  return <main className="watch-page rookie-watch">
+    <header className="rookie-watch-heading rookie-section-heading">
+      <div><h1>{game.home_team} vs {game.away_team}</h1><p>{game.date} · {game.stadium}</p></div>
+      <button type="button" onClick={finish} className="secondary-button">시청 종료 ↗</button>
+    </header>
     <section className="watch-main" aria-label="경기 영상과 챗봇">
       <WatchPlayer
         source={source} time={time} duration={duration} videoError={videoError} videoRef={videoRef} board={board}

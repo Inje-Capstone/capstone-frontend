@@ -9,6 +9,7 @@ import OnboardingPage from '../pages/OnboardingPage'
 import WatchPage from '../pages/WatchPage'
 import DictionaryPage from '../pages/DictionaryPage'
 import QuizPage from '../pages/QuizPage'
+import KboPage from '../pages/KboPage'
 import ShopPage from '../pages/ShopPage'
 import MyPage from '../pages/MyPage'
 import AuthProvider from '../auth/AuthProvider'
@@ -29,6 +30,7 @@ export default function AppRouter() {
    <Route path="/watch/:gameId" element={<WatchPage/>}/>
    <Route path="/dictionary" element={<DictionaryPage/>}/>
    <Route path="/quiz" element={<QuizPage/>}/>
+   <Route path="/kbo" element={<KboPage/>}/>
    <Route path="/shop" element={<ShopPage/>}/>
    <Route path="/mypage" element={<MyPage/>}/>
   </Route></Route>
