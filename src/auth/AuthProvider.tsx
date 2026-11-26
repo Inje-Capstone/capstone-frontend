@@ -17,7 +17,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [initialLocationKey] = useState(location.key)
   const [state, setState] = useState<AuthState>({ status: 'checking' })
-  const [splashDone,setSplashDone]=useState(()=>['/splash','/oauth/callback'].includes(window.location.pathname))
+
+  // Keep the reset page mounted while it removes the one-time token from the URL.
+  const [splashDone, setSplashDone] = useState(() =>
+      ['/splash', '/oauth/callback', '/password-reset'].includes(window.location.pathname),
+  )
+
   const generation = useRef(0)
   const pending = useRef<AbortController | null>(null)
 
