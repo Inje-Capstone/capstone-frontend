@@ -8,6 +8,7 @@ export default function PasswordResetPage() {
  const [searchParams, setSearchParams] = useSearchParams()
  const [token, setToken] = useState(() => searchParams.get('token'))
  const [email, setEmail] = useState('')
+ const [emailFormatInvalid, setEmailFormatInvalid] = useState(false)
  const [password, setPassword] = useState('')
  const [confirmation, setConfirmation] = useState('')
  const [busy, setBusy] = useState(false)
@@ -77,11 +78,32 @@ export default function PasswordResetPage() {
        {!complete && !invalidLink && (
            <form className="login-form" onSubmit={submit}>
             {token === null ? (
-                <input
+                <>
+                 <input
                     type="email" aria-label="이메일" placeholder="이메일"
-                    autoComplete="email" maxLength={254} required
-                    value={email} onChange={e => setEmail(e.target.value)}
-                />
+                    data-form-hints="off" autoComplete="email" maxLength={254} required
+                    aria-invalid={emailFormatInvalid || undefined}
+                    aria-describedby={emailFormatInvalid ? 'reset-email-format-error' : undefined}
+                    value={email}
+                    onChange={event => {
+                     setEmail(event.target.value)
+                     setEmailFormatInvalid(false)
+                     setError('')
+                     setNotice('')
+                    }}
+                    onInvalid={event => {
+                     event.preventDefault()
+                     if (!event.currentTarget.validity.typeMismatch) return
+                     setEmailFormatInvalid(true)
+                     event.currentTarget.focus()
+                    }}
+                 />
+                 {emailFormatInvalid && (
+                     <p id="reset-email-format-error" className="login-error" role="alert">
+                      이메일 주소 형식을 확인해 주세요.
+                     </p>
+                 )}
+                </>
             ) : (
                 <>
                  <input
@@ -96,7 +118,7 @@ export default function PasswordResetPage() {
                  />
                 </>
             )}
-            <button type="submit" className="login-submit" disabled={busy}>
+            <button type="submit" className="login-submit" disabled={busy || (token === null && !email.trim())}>
              {busy ? '처리 중…' : token === null ? '재설정 링크 보내기' : '새 비밀번호 저장'}
             </button>
            </form>
