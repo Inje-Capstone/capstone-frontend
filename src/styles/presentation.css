@@ -19,7 +19,6 @@
 .text-button:disabled{opacity:.45}
 .login-links a,.center-link{display:inline-flex;align-items:center;justify-content:center;min-height:2.25rem;padding:.45rem .7rem;border:1px solid #d5d5d5;border-radius:.375rem;background:#fff;line-height:1.35;text-decoration:none}
 .center-link{display:flex;width:max-content;max-width:100%}
-.admin-login{width:100%;margin-top:.25rem;font-size:.8125rem}
 .chat-history .messages{min-height:9rem;max-height:18rem;overflow-y:auto;padding-block:.75rem}
 .card-actions{margin-block:1rem}
 .explanation-card .card-cta{margin-top:.75rem}

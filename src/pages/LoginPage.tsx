@@ -70,7 +70,6 @@ export default function LoginPage() {
         <a href={oauthStartUrl('google')} aria-label="구글로 로그인" title="구글로 로그인"><img className="google-brand" src={googleIcon} alt=""/></a>
         <a href={oauthStartUrl('kakao')} className="kakao-login" aria-label="카카오로 로그인" title="카카오로 로그인"><span className="kakao-symbol"><img src={kakaoIcon} alt=""/></span></a>
       </div>
-      <button className="admin-login secondary-button" type="button" onClick={()=>setError('관리자 로그인은 준비 중이에요.')}>관리자 전용 로그인</button>
       <p className="login-footnote">야구를 알아가는 첫걸음, LOOKIE와 함께해요.</p>
     </section>
   </main>
